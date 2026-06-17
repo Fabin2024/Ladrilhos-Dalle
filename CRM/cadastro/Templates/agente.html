@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html class="scroll-smooth antialiased font-body" lang="pt-br">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Dalle Piagge Ladrilhos | IA Agente</title>
+    
+    <!-- Fonts from Google Fonts CDN -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+    
+    <!-- Tailwind CSS from CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Iconify from CDN -->
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        graphite: {
+                            900: '#0E0F11',
+                            800: '#1A1C20',
+                            700: '#2A2D35',
+                            500: '#5C5F66',
+                            300: '#8E919A',
+                            100: '#EAECEE',
+                        },
+                        amber: '#E8A020',
+                        amberDark: '#D18D1A',
+                        canvas: '#F6F4F0',
+                        surface: '#FFFFFF',
+                    },
+                    fontFamily: {
+                        display: ['"Space Grotesk"', 'system-ui', 'sans-serif'],
+                        body: ['"Inter"', 'system-ui', 'sans-serif'],
+                        mono: ['"IBM Plex Mono"', 'monospace'],
+                    },
+                    transitionTimingFunction: {
+                        'swiss': 'cubic-bezier(0.16, 1, 0.3, 1)',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Noise Overlay */
+        .noise-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9998;
+            pointer-events: none;
+            opacity: 0.028;
+            mix-blend-mode: multiply;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.64' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* Micro-animations */
+        .chat-bubble-enter {
+            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-canvas text-graphite-900 font-body relative min-h-screen flex overflow-hidden">
+    <!-- Global Accoutrements -->
+    <div class="noise-overlay"></div>
+
+    <!-- Sidebar Navigation -->
+    <aside class="flex-shrink-0 h-screen w-20 bg-graphite-900 border-r border-graphite-900/10 flex flex-col items-center py-6 z-40">
+        <!-- Brand Logo -->
+        <div class="w-10 h-10 rounded-full flex items-center justify-center mb-8 shadow-lg overflow-hidden">
+            <img src="/static/img/logo.jpg" alt="Dalle Piagge Ladrilhos Logo" class="w-full h-full object-cover">
+        </div>
+        
+        <!-- Menu Icons -->
+        <div class="flex flex-col gap-6 w-full items-center">
+            <a href="/workspace/{{ workspace.id }}/dashboard/" class="text-graphite-500 hover:text-amber hover:bg-surface/5 rounded-xl p-2.5 transition-colors" title="Dashboard">
+                <iconify-icon icon="solar:home-smile-linear" width="24"></iconify-icon>
+            </a>
+            <a href="/workspace/{{ workspace.id }}/atendimento/" class="text-graphite-500 hover:text-amber hover:bg-surface/5 rounded-xl p-2.5 transition-colors" title="Atendimento">
+                <iconify-icon icon="solar:chat-round-dots-linear" width="24"></iconify-icon>
+            </a>
+            <a href="/workspace/{{ workspace.id }}/agente/" class="text-white bg-surface/10 rounded-xl p-2.5 transition-colors" title="IA Agente">
+                <iconify-icon icon="lucide:bot" width="24"></iconify-icon>
+            </a>
+            <a href="/workspace/{{ workspace.id }}/canais/" class="text-graphite-500 hover:text-amber hover:bg-surface/5 rounded-xl p-2.5 transition-colors" title="Canais">
+                <iconify-icon icon="solar:users-group-two-rounded-linear" width="24"></iconify-icon>
+            </a>
+            <a href="/workspace/{{ workspace.id }}/analise/" class="text-graphite-500 hover:text-amber hover:bg-surface/5 rounded-xl p-2.5 transition-colors" title="Análise">
+                <iconify-icon icon="solar:chart-square-linear" width="24"></iconify-icon>
+            </a>
+        </div>
+        
+        <!-- Bottom Action (Voltar) -->
+        <div class="mt-auto">
+            <a href="{% url 'workspace' %}" class="text-graphite-500 hover:text-amber hover:bg-surface/5 rounded-xl p-2.5 transition-colors block" title="Voltar para Workspaces">
+                <iconify-icon icon="solar:arrow-left-linear" width="24"></iconify-icon>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Workspace Area -->
+    <main class="flex-grow flex h-screen overflow-hidden">
+        {% csrf_token %}
+        <!-- Chat Content Panel -->
+        <section class="flex-grow flex flex-col h-full bg-[#FAF9F6] relative" id="chat-panel">
+            
+            <div class="flex flex-col h-full z-10" id="active-chat-state">
+                <!-- Active Chat Header -->
+                <header class="p-6 border-b border-graphite-900/10 bg-surface flex justify-between items-center flex-shrink-0">
+                    <div class="flex items-center gap-4">
+                        <div class="w-11 h-11 bg-graphite-900 text-amber font-display text-sm font-semibold flex items-center justify-center relative flex-shrink-0 shadow-md">
+                            <iconify-icon icon="solar:magic-stick-3-bold" width="24"></iconify-icon>
+                        </div>
+                        <div>
+                            <h2 class="font-display font-semibold text-base text-graphite-900 leading-tight">{{ workspace.agente_nome }}</h2>
+                            <div class="flex items-center gap-1.5 mt-0.5">
+                                <div class="w-1.5 h-1.5 bg-[#10B981] rounded-full animate-pulse"></div>
+                                <span class="font-mono text-[9px] text-[#10B981] uppercase tracking-wider">Online</span>
+                                <span class="font-mono text-[9px] text-graphite-500 border-l border-graphite-900/10 pl-1.5 ml-1.5">Inteligência Artificial</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Header Actions -->
+                    <div class="flex items-center gap-3">
+                        <button id="btn-agent-settings" class="text-graphite-500 hover:text-amber p-1.5 transition-colors" title="Configurações do Agente">
+                            <iconify-icon icon="solar:settings-linear" width="20"></iconify-icon>
+                        </button>
+                    </div>
+                </header>
+
+                <!-- Active Chat Messages History (Scrollable) -->
+                <div class="flex-grow overflow-y-auto p-6 space-y-4 bg-canvas/30 flex flex-col hide-scrollbar" id="messages-container">
+                    
+                    <!-- Mensagem de Boas-vindas -->
+                    <div class="flex justify-start chat-bubble-enter">
+                        <div class="max-w-[70%] p-3.5 rounded-none flex flex-col gap-1.5 bg-surface text-graphite-900 border border-graphite-900/10 shadow-[0_2px_8px_rgba(14,15,17,0.01)]">
+                            <p class="font-body text-[11px] leading-relaxed whitespace-pre-wrap">Olá! Eu sou o assistente de prospecção do Dalle Piagge Ladrilhos. Como posso te ajudar hoje?</p>
+                            <span class="font-mono text-[8px] self-end opacity-60">Agora</span>
+                        </div>
+                    </div>
+                    
+                </div>
+
+                <!-- Typings simulation indicator (Hidden by default) -->
+                <div id="typing-indicator" class="hidden px-6 py-2 text-xs text-graphite-500 font-mono italic bg-canvas/10 flex items-center gap-2">
+                    <div class="flex gap-1 items-center">
+                        <span class="w-1 h-1 bg-graphite-500 rounded-full animate-bounce"></span>
+                        <span class="w-1 h-1 bg-graphite-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></span>
+                        <span class="w-1 h-1 bg-graphite-500 rounded-full animate-bounce" style="animation-delay: 0.4s"></span>
+                    </div>
+                    <span id="typing-text">O Agente está digitando...</span>
+                </div>
+
+                <!-- Active Chat Input Footer -->
+                <footer class="p-6 border-t border-graphite-900/10 bg-surface flex-shrink-0">
+                    <form id="message-form" class="flex gap-3 items-center">
+                        <!-- Input Message -->
+                        <input id="message-input" type="text" autocomplete="off" class="flex-grow bg-canvas border border-graphite-900/10 px-4 py-3 font-body text-xs text-graphite-900 placeholder:text-graphite-500/50 focus:outline-none focus:border-amber focus:ring-1 focus:ring-amber transition-all" placeholder="Pergunte ao Agente..."/>
+                        
+                        <!-- Send Button -->
+                        <button type="submit" class="bg-gradient-to-b from-graphite-800 to-graphite-900 hover:shadow-[0_4px_14px_rgba(14,15,17,0.2)] text-white px-5 py-3 font-mono text-[10px] font-semibold uppercase tracking-wider flex items-center gap-2 transition-all">
+                            <span>Enviar</span>
+                            <iconify-icon icon="solar:send-bold" width="14"></iconify-icon>
+                        </button>
+                    </form>
+                </footer>
+            </div>
+        </section>
+
+        <!-- Agent Settings Panel (Hidden by default, slides in) -->
+        <aside id="agent-settings-panel" class="w-80 bg-surface border-l border-graphite-900/10 flex-shrink-0 flex flex-col h-full transition-all duration-300 translate-x-full hidden relative z-20 shadow-[-4px_0_24px_rgba(14,15,17,0.02)]">
+            <header class="p-6 border-b border-graphite-900/10 flex justify-between items-center bg-surface">
+                <h3 class="font-display font-semibold text-sm text-graphite-900 flex items-center gap-2">
+                    <iconify-icon icon="solar:settings-linear" class="text-amber" width="18"></iconify-icon>
+                    Configurações do Agente
+                </h3>
+                <button id="btn-close-settings" class="text-graphite-500 hover:text-[#F43F5E] p-1 transition-colors">
+                    <iconify-icon icon="solar:close-circle-linear" width="20"></iconify-icon>
+                </button>
+            </header>
+            
+            <div class="flex-grow overflow-y-auto p-6 space-y-6 hide-scrollbar">
+                <!-- Agent Name -->
+                <div class="space-y-2">
+                    <label class="font-mono text-[10px] text-graphite-500 uppercase tracking-widest font-semibold block">Nome do Agente</label>
+                    <input type="text" id="agent-name" value="{{ workspace.agente_nome }}" class="w-full bg-canvas border border-graphite-900/10 px-3 py-2.5 font-body text-xs text-graphite-900 focus:outline-none focus:border-amber transition-all" />
+                </div>
+
+                <!-- Agent Status Toggle -->
+                <div class="space-y-2">
+                    <label class="font-mono text-[10px] text-graphite-500 uppercase tracking-widest font-semibold block">Status Automático do Agente</label>
+                    <div class="flex items-center justify-between bg-canvas border border-graphite-900/10 px-3 py-2.5">
+                        <span id="agent-status-label" class="font-display font-medium text-xs {% if workspace.agente_ativo %}text-[#10B981]{% else %}text-graphite-500{% endif %}">
+                            {% if workspace.agente_ativo %}CONECTADO (RESPONDENDO){% else %}DESCONECTADO (PAUSADO){% endif %}
+                        </span>
+                        <button type="button" id="btn-toggle-agent" data-status="{{ workspace.agente_ativo|lower }}" class="font-mono text-[10px] font-bold uppercase tracking-wider px-3 py-1 transition-all border {% if workspace.agente_ativo %}border-[#F43F5E] text-[#F43F5E] hover:bg-[#F43F5E] hover:text-white{% else %}border-[#10B981] text-[#10B981] hover:bg-[#10B981] hover:text-white{% endif %}">
+                            {% if workspace.agente_ativo %}DESCONECTAR{% else %}CONECTAR{% endif %}
+                        </button>
+                    </div>
+                    <p class="text-[9px] text-graphite-500 mt-1">Quando conectado, o agente lerá e responderá as mensagens do WhatsApp automaticamente.</p>
+                </div>
+                
+                <!-- System Prompt (Introduction) -->
+                <div class="space-y-2">
+                    <label class="font-mono text-[10px] text-graphite-500 uppercase tracking-widest font-semibold block">Instruções (System Prompt)</label>
+                    <textarea id="agent-instructions" rows="5" class="w-full bg-canvas border border-graphite-900/10 px-3 py-2.5 font-body text-xs text-graphite-900 focus:outline-none focus:border-amber transition-all resize-none">{{ workspace.agente_instrucoes }}</textarea>
+                    <p class="text-[9px] text-graphite-500 mt-1">Define o comportamento e as regras base do agente.</p>
+                </div>
+                
+                <!-- Knowledge Base / Upload -->
+                <div class="space-y-2">
+                    <label class="font-mono text-[10px] text-graphite-500 uppercase tracking-widest font-semibold flex items-center gap-1">
+                        <iconify-icon icon="solar:document-text-linear" width="12"></iconify-icon>
+                        Base de Conhecimento
+                    </label>
+                    
+                    <div id="conhecimentos-list" class="space-y-2">
+                        {% for doc in conhecimentos %}
+                        <div class="border border-graphite-900/10 bg-canvas p-3 flex items-start gap-3 group relative hover:border-amber transition-all" id="doc-{{ doc.id }}">
+                            <div class="w-8 h-8 rounded bg-graphite-900/5 flex items-center justify-center shrink-0 text-amber">
+                                <iconify-icon icon="solar:document-bold" width="16"></iconify-icon>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h4 class="font-mono text-xs text-graphite-100 truncate pr-6">{{ doc.nome_arquivo }}</h4>
+                                <p class="font-mono text-[10px] text-graphite-500 mt-1">{{ doc.tamanho }}</p>
+                            </div>
+                            <button onclick="deletarConhecimento({{ doc.id }})" type="button" class="absolute top-3 right-3 text-graphite-500 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity" title="Remover Documento">
+                                <iconify-icon icon="solar:trash-bin-trash-linear" width="14"></iconify-icon>
+                            </button>
+                        </div>
+                        {% empty %}
+                        <p class="text-xs text-graphite-500 font-mono text-center py-4">Nenhum documento anexado.</p>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Upload Button -->
+                    <input type="file" id="arquivo_conhecimento" class="hidden" accept=".pdf,.xls,.xlsx,.csv" onchange="uploadConhecimento()">
+                    <button type="button" onclick="document.getElementById('arquivo_conhecimento').click()" class="w-full mt-2 border border-dashed border-graphite-900/20 bg-canvas/50 hover:bg-canvas text-graphite-500 hover:text-amber py-3 flex flex-col items-center justify-center gap-1 transition-all">
+                        <iconify-icon icon="solar:upload-minimalistic-linear" width="18"></iconify-icon>
+                        <span class="font-mono text-[9px] uppercase tracking-wider" id="upload-text">Anexar Arquivo</span>
+                    </button>
+                </div>
+            </div>
+            
+            <footer class="p-6 border-t border-graphite-900/10 bg-surface">
+                <button type="button" id="btn-save-settings" class="w-full bg-gradient-to-b from-graphite-800 to-graphite-900 hover:shadow-[0_4px_14px_rgba(14,15,17,0.2)] text-white px-4 py-3 font-mono text-[10px] font-semibold uppercase tracking-wider transition-all text-center">
+                    Salvar Configurações
+                </button>
+            </footer>
+        </aside>
+    </main>
+
+    <script>
+        // Panel Toggle Logic
+        const btnAgentSettings = document.getElementById("btn-agent-settings");
+        const btnCloseSettings = document.getElementById("btn-close-settings");
+        const agentSettingsPanel = document.getElementById("agent-settings-panel");
+        
+        btnAgentSettings.addEventListener("click", () => {
+            agentSettingsPanel.classList.remove("hidden");
+            // Delay to allow display:block before applying transition
+            setTimeout(() => {
+                agentSettingsPanel.classList.remove("translate-x-full");
+            }, 10);
+        });
+
+        btnCloseSettings.addEventListener("click", () => {
+            agentSettingsPanel.classList.add("translate-x-full");
+            setTimeout(() => {
+                agentSettingsPanel.classList.add("hidden");
+            }, 300);
+        });
+
+        // Chat Logic
+        const messageForm = document.getElementById("message-form");
+        const messageInput = document.getElementById("message-input");
+        const messagesContainer = document.getElementById("messages-container");
+        const typingIndicator = document.getElementById("typing-indicator");
+
+        // Agent Toggle Logic
+        const btnToggleAgent = document.getElementById("btn-toggle-agent");
+        const agentStatusLabel = document.getElementById("agent-status-label");
+        
+        if (btnToggleAgent) {
+            btnToggleAgent.addEventListener("click", async () => {
+                const isCurrentlyActive = btnToggleAgent.getAttribute("data-status") === "true";
+                const newStatus = !isCurrentlyActive;
+                
+                try {
+                    const response = await fetch('/workspace/{{ workspace.id }}/agente/toggle/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ ativo: newStatus })
+                    });
+                    
+                    const data = await response.json();
+                    if (data.success) {
+                        // Update UI
+                        btnToggleAgent.setAttribute("data-status", data.agente_ativo.toString());
+                        if (data.agente_ativo) {
+                            agentStatusLabel.textContent = "CONECTADO (RESPONDENDO)";
+                            agentStatusLabel.className = "font-display font-medium text-xs text-[#10B981]";
+                            btnToggleAgent.textContent = "DESCONECTAR";
+                            btnToggleAgent.className = "font-mono text-[10px] font-bold uppercase tracking-wider px-3 py-1 transition-all border border-[#F43F5E] text-[#F43F5E] hover:bg-[#F43F5E] hover:text-white";
+                        } else {
+                            agentStatusLabel.textContent = "DESCONECTADO (PAUSADO)";
+                            agentStatusLabel.className = "font-display font-medium text-xs text-graphite-500";
+                            btnToggleAgent.textContent = "CONECTAR";
+                            btnToggleAgent.className = "font-mono text-[10px] font-bold uppercase tracking-wider px-3 py-1 transition-all border border-[#10B981] text-[#10B981] hover:bg-[#10B981] hover:text-white";
+                        }
+                    } else {
+                        alert("Erro ao alterar o status do agente: " + (data.message || data.error));
+                    }
+                } catch (err) {
+                    console.error("Erro ao alterar status:", err);
+                    alert("Ocorreu um erro de conexão ao tentar alterar o status.");
+                }
+            });
+        }
+
+        // Save Agent Settings
+        const btnSaveSettings = document.getElementById("btn-save-settings");
+        const agentInstructions = document.getElementById("agent-instructions");
+        const agentNameInput = document.getElementById("agent-name");
+        
+        if (btnSaveSettings && agentInstructions && agentNameInput) {
+            btnSaveSettings.addEventListener("click", async () => {
+                const instrucoes = agentInstructions.value;
+                const nome = agentNameInput.value;
+                const originalText = btnSaveSettings.innerText;
+                
+                btnSaveSettings.innerText = "SALVANDO...";
+                btnSaveSettings.classList.add("opacity-70", "pointer-events-none");
+                
+                try {
+                    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                    const response = await fetch(`/workspace/{{ workspace.id }}/agente/salvar_configuracoes/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrftoken
+                        },
+                        body: JSON.stringify({ instrucoes: instrucoes, nome: nome })
+                    });
+                    
+                    const data = await response.json();
+                    if (data.success) {
+                        btnSaveSettings.innerText = "SALVO!";
+                        btnSaveSettings.classList.replace("from-graphite-800", "from-[#10B981]");
+                        btnSaveSettings.classList.replace("to-graphite-900", "to-[#059669]");
+                        
+                        setTimeout(() => {
+                            btnSaveSettings.innerText = originalText;
+                            btnSaveSettings.classList.remove("opacity-70", "pointer-events-none");
+                            btnSaveSettings.classList.replace("from-[#10B981]", "from-graphite-800");
+                            btnSaveSettings.classList.replace("to-[#059669]", "to-graphite-900");
+                        }, 2000);
+                    } else {
+                        alert("Erro ao salvar: " + (data.message || data.error));
+                        btnSaveSettings.innerText = originalText;
+                        btnSaveSettings.classList.remove("opacity-70", "pointer-events-none");
+                    }
+                } catch (err) {
+                    console.error("Erro ao salvar configurações:", err);
+                    alert("Erro de conexão ao salvar.");
+                    btnSaveSettings.innerText = originalText;
+                    btnSaveSettings.classList.remove("opacity-70", "pointer-events-none");
+                }
+            });
+        }
+
+        function getTimeString() {
+            const now = new Date();
+            return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        }
+
+        function appendMessage(text, isUser) {
+            const timeStr = getTimeString();
+            const wrapperClass = isUser ? "justify-end" : "justify-start";
+            const bubbleClass = isUser 
+                ? "bg-graphite-900 text-canvas border border-graphite-800" 
+                : "bg-surface text-graphite-900 border border-graphite-900/10 shadow-[0_2px_8px_rgba(14,15,17,0.01)]";
+
+            const msgBubble = document.createElement("div");
+            msgBubble.className = `flex ${wrapperClass} chat-bubble-enter`;
+            msgBubble.innerHTML = `
+                <div class="max-w-[70%] p-3.5 rounded-none flex flex-col gap-1.5 ${bubbleClass}">
+                    <p class="font-body text-[11px] leading-relaxed whitespace-pre-wrap">${text}</p>
+                    <span class="font-mono text-[8px] self-end opacity-60">${timeStr}</span>
+                </div>
+            `;
+            messagesContainer.appendChild(msgBubble);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        messageForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const text = messageInput.value.trim();
+            if (!text) return;
+
+            // Display user message
+            appendMessage(text, true);
+            messageInput.value = "";
+
+            // Show typing indicator
+            typingIndicator.classList.remove("hidden");
+
+            try {
+
+                // Fetch to django endpoint
+                const response = await fetch(window.location.pathname, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: text })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    appendMessage(data.resposta, false);
+                } else {
+                    appendMessage("⚠️ Erro: " + (data.message || data.error), false);
+                }
+            } catch (err) {
+                appendMessage("⚠️ Ocorreu um erro de conexão com o agente.", false);
+            } finally {
+                // Hide typing indicator
+                typingIndicator.classList.add("hidden");
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+        });
+
+        document.getElementById('save-config-btn').addEventListener('click', async () => {
+            const instrucoes = document.getElementById('agente_instrucoes').value;
+            const btn = document.getElementById('save-config-btn');
+            const originalText = btn.innerHTML;
+            
+            btn.innerHTML = '<iconify-icon icon="line-md:loading-twotone-loop" width="18"></iconify-icon> Salvando...';
+            
+            try {
+                const response = await fetch(`/workspace/{{ workspace.id }}/agente/salvar_configuracoes/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ agente_instrucoes: instrucoes })
+                });
+                
+                const data = await response.json();
+                if(data.success) {
+                    btn.innerHTML = '<iconify-icon icon="solar:check-circle-bold" width="18"></iconify-icon> Salvo!';
+                    btn.classList.add('text-green-500');
+                    setTimeout(() => {
+                        btn.innerHTML = originalText;
+                        btn.classList.remove('text-green-500');
+                    }, 2000);
+                }
+            } catch (error) {
+                console.error(error);
+                btn.innerHTML = originalText;
+            }
+        });
+
+        async function uploadConhecimento() {
+            const input = document.getElementById('arquivo_conhecimento');
+            if(!input.files || input.files.length === 0) return;
+            
+            const file = input.files[0];
+            const formData = new FormData();
+            formData.append('arquivo', file);
+            
+            const uploadText = document.getElementById('upload-text');
+            uploadText.innerText = 'Enviando e processando...';
+            
+            try {
+                const response = await fetch(`/workspace/{{ workspace.id }}/agente/conhecimento/upload/`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                
+                if(data.success) {
+                    window.location.reload();
+                } else {
+                    alert('Erro ao enviar documento: ' + (data.message || data.error));
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Erro na requisição.');
+            } finally {
+                input.value = '';
+                uploadText.innerText = 'Anexar Arquivo';
+            }
+        }
+
+        async function deletarConhecimento(docId) {
+            if(!confirm('Tem certeza que deseja remover este documento da Base de Conhecimento?')) return;
+            
+            try {
+                const response = await fetch(`/workspace/{{ workspace.id }}/agente/conhecimento/${docId}/deletar/`, {
+                    method: 'POST',
+                });
+                const data = await response.json();
+                if(data.success) {
+                    document.getElementById(`doc-${docId}`).remove();
+                    window.location.reload();
+                } else {
+                    alert('Erro ao remover documento: ' + (data.error || data.message));
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Erro na requisição.');
+            }
+        }
+    </script>
+</body>
+</html>

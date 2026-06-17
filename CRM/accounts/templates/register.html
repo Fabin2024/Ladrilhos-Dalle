@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html class="scroll-smooth antialiased" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Dalle Piagge Ladrilhos | Criar Conta</title>
+    
+    <!-- Fonts from Google Fonts CDN -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+    
+    <!-- Tailwind CSS from CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Iconify from CDN -->
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        graphite: {
+                            900: '#0E0F11',
+                            800: '#1A1C20',
+                            700: '#2A2D35',
+                            500: '#5C5F66',
+                        },
+                        amber: '#E8A020',
+                        amberDark: '#D18D1A',
+                        canvas: '#F6F4F0',
+                        surface: '#FFFFFF',
+                    },
+                    fontFamily: {
+                        display: ['"Space Grotesk"', 'system-ui', 'sans-serif'],
+                        body: ['"Inter"', 'system-ui', 'sans-serif'],
+                        mono: ['"IBM Plex Mono"', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        .noise-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9998;
+            pointer-events: none;
+            opacity: 0.028;
+            mix-blend-mode: multiply;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.64' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(14, 15, 17, 0.1);
+        }
+
+        /* Form Custom Styles for Django UserCreationForm */
+        .django-form label {
+            display: block;
+            font-size: 0.75rem;
+            font-family: 'IBM Plex Mono', monospace;
+            letter-spacing: 0.1em;
+            color: #5C5F66;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+            margin-top: 1rem;
+        }
+        .django-form input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background-color: #FFFFFF;
+            border: 1px solid rgba(14, 15, 17, 0.1);
+            border-radius: 0.75rem;
+            font-size: 0.875rem;
+            font-family: 'Inter', sans-serif;
+            color: #0E0F11;
+            transition: all 0.3s;
+        }
+        .django-form input:focus {
+            outline: none;
+            border-color: #E8A020;
+            box-shadow: 0 0 0 1px #E8A020;
+        }
+        .django-form .helptext, .django-form ul {
+            font-size: 0.75rem;
+            color: #8E919A;
+            margin-top: 0.5rem;
+            font-family: 'Inter', sans-serif;
+            display: block;
+        }
+        .django-form .errorlist {
+            color: #EF4444; /* Tailwind red-500 */
+            margin-top: 0.5rem;
+            list-style: none;
+            padding: 0;
+            font-size: 0.75rem;
+        }
+    </style>
+</head>
+
+<body class="bg-canvas text-graphite-900 font-body relative overflow-x-hidden min-h-screen flex items-center justify-center py-12">
+
+    <!-- Global Accoutrements -->
+    <div class="noise-overlay"></div>
+
+    <div class="w-full max-w-md px-6 relative z-10">
+        <!-- Logo -->
+        <div class="flex justify-center mb-10">
+            <a href="#" class="font-display font-semibold text-2xl tracking-[0.04em] text-graphite-900 uppercase flex items-center gap-2">
+                <img src="/static/img/logo.jpg" alt="Dalle Piagge Ladrilhos Logo" class="w-10 h-10 rounded-full object-cover border border-graphite-900/10">
+                Dalle Piagge Ladrilhos
+            </a>
+        </div>
+
+        <!-- Form Card -->
+        <div class="glass-card rounded-2xl p-8 shadow-sm">
+            <div class="mb-8 text-center">
+                <h1 class="font-display font-medium text-2xl text-graphite-900 mb-2">Criar nova conta</h1>
+                <p class="text-sm text-graphite-500 font-body">Preencha os dados abaixo para se registrar no sistema.</p>
+            </div>
+
+            {% if create_user.errors and not create_user.is_bound %}
+            <div class="mb-6 p-4 rounded-xl text-sm font-body bg-red-50 text-red-600 border border-red-100">
+                Por favor, corrija os erros abaixo.
+            </div>
+            {% endif %}
+
+            <form method="POST" action="{% url 'register' %}" class="space-y-4 django-form">
+                {% csrf_token %}
+                
+                {{ create_user.as_p }}
+
+                <button type="submit" class="w-full bg-graphite-900 text-white font-body font-medium text-sm px-6 py-3.5 rounded-xl hover:bg-amber transition-colors duration-300 flex items-center justify-center gap-2 mt-6 group">
+                    <span>Registrar e Continuar</span>
+                    <iconify-icon icon="solar:arrow-right-linear" width="18" class="group-hover:translate-x-1 transition-transform"></iconify-icon>
+                </button>
+            </form>
+            
+            <div class="mt-8 text-center border-t border-graphite-900/10 pt-6">
+                <p class="text-sm font-body text-graphite-500">
+                    Já tem uma conta? 
+                    <a href="{% url 'login' %}" class="text-graphite-900 font-medium hover:text-amber transition-colors">Fazer login</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

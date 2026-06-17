@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html class="scroll-smooth antialiased font-body" lang="pt-br">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Dalle Piagge Ladrilhos | Canais</title>
+    
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        graphite: { 900: '#0E0F11', 800: '#1A1C20', 700: '#2A2D35', 500: '#5C5F66', 300: '#8E919A', 100: '#EAECEE' },
+                        amber: '#E8A020',
+                        amberDark: '#D18D1A',
+                        canvas: '#F6F4F0',
+                        surface: '#FFFFFF',
+                    },
+                    fontFamily: {
+                        display: ['"Space Grotesk"', 'system-ui', 'sans-serif'],
+                        body: ['"Inter"', 'system-ui', 'sans-serif'],
+                        mono: ['"IBM Plex Mono"', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-canvas text-graphite-900 font-body relative min-h-screen flex overflow-hidden">
+    <!-- Sidebar Navigation -->
+    <aside class="flex-shrink-0 h-screen w-20 bg-graphite-900 border-r border-graphite-900/10 flex flex-col items-center py-6 z-40">
+        <div class="w-10 h-10 rounded-full flex items-center justify-center mb-8 shadow-lg overflow-hidden">
+            <img src="/static/img/logo.jpg" alt="Dalle Piagge Ladrilhos Logo" class="w-full h-full object-cover">
+        </div>
+        
+        <div class="flex flex-col gap-6 w-full items-center">
+            <a href="/workspace/{{ workspace.id }}/dashboard/" class="text-graphite-500 hover:text-amber hover:bg-surface/5 rounded-xl p-2.5 transition-colors" title="Dashboard">
+                <iconify-icon icon="solar:home-smile-linear" width="24"></iconify-icon>
+            </a>
+            <a href="/workspace/{{ workspace.id }}/atendimento/" class="text-graphite-500 hover:text-amber hover:bg-surface/5 rounded-xl p-2.5 transition-colors" title="Atendimento">
+                <iconify-icon icon="solar:chat-round-dots-linear" width="24"></iconify-icon>
+            </a>
+            <a href="/workspace/{{ workspace.id }}/agente/" class="text-graphite-500 hover:text-amber hover:bg-surface/5 rounded-xl p-2.5 transition-colors" title="IA Agente">
+                <iconify-icon icon="lucide:bot" width="24"></iconify-icon>
+            </a>
+            <a href="/workspace/{{ workspace.id }}/canais/" class="text-white bg-surface/10 rounded-xl p-2.5 transition-colors" title="Canais / Instâncias">
+                <iconify-icon icon="solar:users-group-two-rounded-bold" width="24"></iconify-icon>
+            </a>
+            <a href="/workspace/{{ workspace.id }}/analise/" class="text-graphite-500 hover:text-amber hover:bg-surface/5 rounded-xl p-2.5 transition-colors" title="Análise">
+                <iconify-icon icon="solar:chart-square-linear" width="24"></iconify-icon>
+            </a>
+        </div>
+        
+        <div class="mt-auto">
+            <a href="{% url 'workspace' %}" class="text-graphite-500 hover:text-amber hover:bg-surface/5 rounded-xl p-2.5 transition-colors block" title="Voltar para Workspaces">
+                <iconify-icon icon="solar:arrow-left-linear" width="24"></iconify-icon>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex flex-col h-screen overflow-y-auto p-8 bg-[#FAF9F6]">
+        <header class="mb-8 flex justify-between items-end">
+            <div>
+                <h1 class="font-display font-semibold text-2xl text-graphite-900 mb-2">Canais & Instâncias</h1>
+                <p class="font-body text-sm text-graphite-500">Crie novos canais para gerar instâncias na Evolution API.</p>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Form Card -->
+            <section class="col-span-1 bg-surface border border-graphite-900/10 p-6 shadow-sm self-start">
+                <h2 class="font-display font-semibold text-lg text-graphite-900 mb-6 flex items-center gap-2">
+                    <iconify-icon icon="solar:user-plus-bold" class="text-amber" width="20"></iconify-icon>
+                    Novo Canal
+                </h2>
+                
+                <form method="POST" action="/workspace/{{ workspace.id }}/canais/" class="space-y-5">
+                    {% csrf_token %}
+                    
+                    <div class="space-y-1.5">
+                        <label for="{{ forms.nome.id_for_label }}" class="font-mono text-[10px] text-graphite-500 uppercase tracking-widest font-semibold block">Nome</label>
+                        <input type="text" name="{{ forms.nome.html_name }}" id="{{ forms.nome.id_for_label }}" required class="w-full bg-canvas border border-graphite-900/10 px-4 py-3 font-body text-xs text-graphite-900 focus:outline-none focus:border-amber transition-all" placeholder="Ex: João Silva">
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label for="{{ forms.numero.id_for_label }}" class="font-mono text-[10px] text-graphite-500 uppercase tracking-widest font-semibold block">Número (Apenas dígitos)</label>
+                        <input type="number" name="{{ forms.numero.html_name }}" id="{{ forms.numero.id_for_label }}" required class="w-full bg-canvas border border-graphite-900/10 px-4 py-3 font-body text-xs text-graphite-900 focus:outline-none focus:border-amber transition-all" placeholder="Ex: 5511999999999">
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-gradient-to-b from-graphite-800 to-graphite-900 hover:shadow-[0_4px_14px_rgba(14,15,17,0.2)] text-white px-5 py-3.5 font-mono text-[10px] font-semibold uppercase tracking-wider transition-all mt-4">
+                        Criar Instância & Canal
+                    </button>
+                </form>
+            </section>
+
+            <!-- List Card -->
+            <section class="col-span-1 md:col-span-2 bg-surface border border-graphite-900/10 p-6 shadow-sm">
+                <h2 class="font-display font-semibold text-lg text-graphite-900 mb-6 flex items-center gap-2">
+                    <iconify-icon icon="solar:users-group-rounded-bold" class="text-amber" width="20"></iconify-icon>
+                    Canais Cadastrados
+                </h2>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-graphite-900/10">
+                                <th class="pb-3 font-mono text-[10px] text-graphite-500 uppercase tracking-widest font-semibold">Nome</th>
+                                <th class="pb-3 font-mono text-[10px] text-graphite-500 uppercase tracking-widest font-semibold">Número</th>
+                                <th class="pb-3 font-mono text-[10px] text-graphite-500 uppercase tracking-widest font-semibold text-right w-24">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-sm">
+                            {% for canal in canais %}
+                            <tr class="border-b border-graphite-900/5 hover:bg-canvas/50 transition-colors">
+                                <td class="py-4 font-display font-medium text-graphite-900">{{ canal.nome }}</td>
+                                <td class="py-4 font-mono text-xs text-graphite-500">{{ canal.numero }}</td>
+                                <td class="py-4 text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <a href="/workspace/{{ workspace.id }}/atendimento/?canal={{ canal.id }}" class="text-graphite-500 hover:text-[#10B981] transition-colors p-1" title="Ir para Conversas (Atendimento)">
+                                            <iconify-icon icon="solar:chat-round-dots-linear" width="18"></iconify-icon>
+                                        </a>
+                                        <form method="POST" action="/workspace/{{ workspace.id }}/canais/{{ canal.id }}/delete/" class="inline m-0 p-0" onsubmit="return confirm('Tem certeza que deseja deletar permanentemente este canal e sua instância na Evolution API?');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="text-graphite-500 hover:text-[#F43F5E] transition-colors p-1 flex items-center justify-center" title="Deletar Canal">
+                                                <iconify-icon icon="solar:trash-bin-trash-linear" width="18"></iconify-icon>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="py-8 text-center text-graphite-500 font-body text-sm">
+                                    Nenhum canal cadastrado ainda.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+</body>
+</html>

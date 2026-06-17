@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html class="scroll-smooth antialiased" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>LADRILHO CRM | Design System & Pattern Library</title>
+    
+    <!-- Fonts (Using Original Assets) -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="assets/da9e6e1c650d79b3_css2.css" rel="stylesheet"/>
+    
+    <!-- Tailwind CSS (Using Original Assets) -->
+    <script src="assets/176e894661aa9cdc_3.4.17"></script>
+    
+    <!-- Iconify (Using Original Assets) -->
+    <script src="assets/851bed7af266f96a_iconify-icon.min.js"></script>
+    
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        graphite: {
+                            900: '#0E0F11',
+                            800: '#1A1C20',
+                            700: '#2A2D35',
+                            500: '#5C5F66',
+                        },
+                        amber: '#E8A020',
+                        amberDark: '#D18D1A',
+                        canvas: '#F6F4F0',
+                        surface: '#FFFFFF',
+                    },
+                    fontFamily: {
+                        display: ['"Space Grotesk"', 'system-ui', 'sans-serif'],
+                        body: ['"Inter"', 'system-ui', 'sans-serif'],
+                        mono: ['"IBM Plex Mono"', 'monospace'],
+                    },
+                    fontSize: {
+                        'h1': 'clamp(2.75rem, 5.5vw, 5.25rem)',
+                        'h2': 'clamp(2rem, 3.5vw, 3.25rem)',
+                        'h3': 'clamp(1.2rem, 1.8vw, 1.6rem)',
+                        'body': 'clamp(0.875rem, 1vw, 1rem)',
+                    },
+                    spacing: {
+                        'section': 'clamp(5.5rem, 9vw, 11rem)',
+                        'container': 'clamp(1.5rem, 5vw, 4rem)',
+                        'card': 'clamp(1.75rem, 2.5vw, 2.5rem)',
+                    },
+                    transitionTimingFunction: {
+                        'swiss': 'cubic-bezier(0.16, 1, 0.3, 1)',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Custom Style Sheet (Reusing exact styles) -->
+    <style>
+        /* Noise Overlay */
+        .noise-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9998;
+            pointer-events: none;
+            opacity: 0.028;
+            mix-blend-mode: multiply;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.64' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+        /* Utilities */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .text-balance { text-wrap: balance; }
+        /* Animations */
+        @keyframes ticker {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        .animate-ticker {
+            animation: ticker 30s linear infinite;
+        }
+        .animate-ticker:hover {
+            animation-play-state: paused;
+        }
+        @keyframes scanSweep {
+            0% { transform: translateX(-100vw); opacity: 0.15; }
+            100% { transform: translateX(100vw); opacity: 0; }
+        }
+        .animate-sweep {
+            animation: scanSweep 2s linear forwards;
+            animation-delay: 0.3s;
+        }
+        /* JS Triggers */
+        .reveal-up {
+            opacity: 0;
+            transform: translateY(18px);
+            transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal-up.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .scan-line {
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .scan-line.is-visible {
+            transform: scaleX(1);
+        }
+        /* Number Counter specific */
+        .counter-value { font-variant-numeric: tabular-nums; }
+        html,body { opacity: 1!important; visibility: visible!important; }
+    </style>
+</head>
+
+<body class="bg-canvas text-graphite-900 font-body text-body selection:bg-amber selection:text-white relative overflow-x-hidden">
+
+    <!-- Global Accoutrements -->
+    <div class="noise-overlay"></div>
+    
+    <!-- Top Scrolling Ticker Bar -->
+    <div class="fixed bottom-0 left-0 w-full h-[36px] bg-graphite-900 z-[9997] overflow-hidden items-center pointer-events-none border-t border-white/10 hidden md:flex">
+        <div class="flex whitespace-nowrap animate-ticker font-mono text-xs text-canvas tracking-[-0.06em]">
+            <span class="mx-4">CRM LADRILHO SYSTEM v2.0 <span class="text-amber">DESIGN SPEC</span> //</span>
+            <span class="mx-4">FONT DISPLAY: Space Grotesk //</span>
+            <span class="mx-4">FONT BODY: Inter //</span>
+            <span class="mx-4">FONT MONO: IBM Plex Mono //</span>
+            <span class="mx-4">ACCENT: Amber (#E8A020) //</span>
+            <span class="mx-4">SURFACE: White (#FFFFFF) //</span>
+            <span class="mx-4">CANVAS: Gray (#F6F4F0) //</span>
+            
+            <!-- Loop Duplicate -->
+            <span class="mx-4">CRM LADRILHO SYSTEM v2.0 <span class="text-amber">DESIGN SPEC</span> //</span>
+            <span class="mx-4">FONT DISPLAY: Space Grotesk //</span>
+            <span class="mx-4">FONT BODY: Inter //</span>
+            <span class="mx-4">FONT MONO: IBM Plex Mono //</span>
+            <span class="mx-4">ACCENT: Amber (#E8A020) //</span>
+            <span class="mx-4">SURFACE: White (#FFFFFF) //</span>
+            <span class="mx-4">CANVAS: Gray (#F6F4F0) //</span>
+        </div>
+    </div>
+
+    <!-- Navigation Header -->
+    <nav id="navbar" class="fixed top-0 w-full z-50 transition-colors duration-300 bg-transparent border-b border-transparent px-container py-4 flex items-center justify-between">
+        <a href="#" class="font-display font-semibold text-xl tracking-[0.04em] text-graphite-900 uppercase">LADRILHO <span class="text-amber">DS</span></a>
+        
+        <div class="hidden lg:flex gap-8 items-center">
+            <a href="#hero" class="font-mono text-xs font-medium uppercase tracking-[0.1em] text-graphite-900 hover:text-amber transition-colors relative group">
+                Hero
+                <span class="absolute -bottom-1 left-1/2 w-0 h-[1px] bg-amber transition-all duration-200 group-hover:w-full group-hover:left-0 origin-center"></span>
+            </a>
+            <a href="#typography" class="font-mono text-xs font-medium uppercase tracking-[0.1em] text-graphite-900 hover:text-amber transition-colors relative group">
+                Typography
+                <span class="absolute -bottom-1 left-1/2 w-0 h-[1px] bg-amber transition-all duration-200 group-hover:w-full group-hover:left-0 origin-center"></span>
+            </a>
+            <a href="#colors" class="font-mono text-xs font-medium uppercase tracking-[0.1em] text-graphite-900 hover:text-amber transition-colors relative group">
+                Colors
+                <span class="absolute -bottom-1 left-1/2 w-0 h-[1px] bg-amber transition-all duration-200 group-hover:w-full group-hover:left-0 origin-center"></span>
+            </a>
+            <a href="#components" class="font-mono text-xs font-medium uppercase tracking-[0.1em] text-graphite-900 hover:text-amber transition-colors relative group">
+                Components
+                <span class="absolute -bottom-1 left-1/2 w-0 h-[1px] bg-amber transition-all duration-200 group-hover:w-full group-hover:left-0 origin-center"></span>
+            </a>
+            <a href="#layout" class="font-mono text-xs font-medium uppercase tracking-[0.1em] text-graphite-900 hover:text-amber transition-colors relative group">
+                Layout
+                <span class="absolute -bottom-1 left-1/2 w-0 h-[1px] bg-amber transition-all duration-200 group-hover:w-full group-hover:left-0 origin-center"></span>
+            </a>
+            <a href="#motion" class="font-mono text-xs font-medium uppercase tracking-[0.1em] text-graphite-900 hover:text-amber transition-colors relative group">
+                Motion
+                <span class="absolute -bottom-1 left-1/2 w-0 h-[1px] bg-amber transition-all duration-200 group-hover:w-full group-hover:left-0 origin-center"></span>
+            </a>
+            <a href="#icons" class="font-mono text-xs font-medium uppercase tracking-[0.1em] text-graphite-900 hover:text-amber transition-colors relative group">
+                Icons
+                <span class="absolute -bottom-1 left-1/2 w-0 h-[1px] bg-amber transition-all duration-200 group-hover:w-full group-hover:left-0 origin-center"></span>
+            </a>
+        </div>
+
+        <a class="relative inline-flex items-center justify-center px-5 py-2.5 font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-graphite-900 bg-gradient-to-b from-amber to-amberDark shadow-[inset_0_1px_0_rgba(255,255,255,0.4),0_2px_10px_rgba(232,160,32,0.2)] rounded-none group hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.4),0_6px_20px_rgba(232,160,32,0.4)] transition-all duration-300 hover:-translate-y-0.5 overflow-hidden" href="index.html">
+            <span class="relative z-10 flex items-center gap-1.5">View Original Concept <iconify-icon icon="solar:arrow-right-linear" width="12"></iconify-icon></span>
+            <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-swiss"></div>
+        </a>
+    </nav>
+
+    <!-- 0) HERO CLONE (TEXT ADAPTED) -->
+    <section id="hero" class="relative min-h-[90vh] pt-[120px] pb-section px-container overflow-hidden flex items-end w-full">
+        <!-- WebGL Approximation Canvas -->
+        <canvas class="absolute top-0 left-0 w-full h-full z-0 pointer-events-none opacity-[0.85] mix-blend-multiply hidden md:block" id="hero-canvas"></canvas>
+        <div class="absolute inset-0 z-0 pointer-events-none bg-[radial-gradient(circle_at_30%_70%,rgba(232,160,32,0.06)_0%,transparent_60%)] md:hidden"></div>
+        
+        <!-- Hero Sweep -->
+        <div class="absolute top-0 left-0 w-[1px] h-full bg-amber opacity-0 z-10 animate-sweep pointer-events-none"></div>
+        
+        <div class="w-full max-w-[clamp(70rem,92vw,96rem)] mx-auto grid grid-cols-1 md:grid-cols-12 gap-8 relative z-10 items-end">
+            <!-- Left Col (5) -->
+            <div class="md:col-span-5 flex flex-col justify-end pb-8 reveal-up">
+                <h1 class="font-display font-light text-h1 leading-[1.05] tracking-tight text-graphite-900 mb-6 text-balance">
+                    CRM Ladrilho <br/><span class="font-normal text-amber">Design System.</span>
+                </h1>
+                <p class="font-body text-graphite-500 max-w-[42ch] mb-10 leading-relaxed text-sm md:text-base">
+                    This living spec library acts as the single source of truth for all HTML layouts, typography scales, buttons, and custom components used across CRM Ladrilho.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center mb-12">
+                    <a class="relative inline-flex items-center justify-center px-8 py-4 font-mono text-xs font-semibold uppercase tracking-[0.1em] text-surface bg-gradient-to-b from-graphite-800 to-graphite-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_4px_20px_rgba(14,15,17,0.2)] rounded-none group hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_8px_32px_rgba(14,15,17,0.3)] transition-all duration-300 hover:-translate-y-0.5 overflow-hidden" href="#components">
+                        <span class="relative z-10 flex items-center gap-2">View Components <iconify-icon icon="solar:calendar-linear" width="16"></iconify-icon></span>
+                        <div class="absolute inset-0 bg-white/5 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-swiss"></div>
+                    </a>
+                    <a class="inline-flex items-center justify-center px-8 py-4 font-mono text-xs font-medium uppercase tracking-[0.1em] text-graphite-900 bg-surface border border-graphite-900/10 shadow-[0_2px_10px_rgba(14,15,17,0.02)] rounded-none hover:shadow-[0_8px_24px_rgba(14,15,17,0.06)] hover:border-graphite-900/20 transition-all duration-300 hover:-translate-y-0.5 group" href="#motion">
+                        See Animations <iconify-icon class="ml-2 text-graphite-500 group-hover:text-amber transition-colors" icon="solar:play-circle-linear" width="16"></iconify-icon>
+                    </a>
+                </div>
+                <div class="flex items-center gap-4 border-t border-graphite-900/10 pt-6">
+                    <div class="flex -space-x-2">
+                        <div class="w-8 h-8 rounded-none bg-graphite-500 border border-canvas shadow-sm"></div>
+                        <div class="w-8 h-8 rounded-none bg-graphite-900 border border-canvas shadow-sm"></div>
+                        <div class="w-8 h-8 rounded-none bg-amber border border-canvas shadow-sm"></div>
+                    </div>
+                    <p class="font-mono text-xs tracking-[0.06em] text-graphite-500 uppercase leading-tight max-w-[200px]">
+                        Structured systematically for <span class="text-graphite-900 font-semibold">CRM Ladrilho</span>.<br/>
+                        <span class="text-graphite-900 font-semibold">100% Alignment</span> with original guidelines.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Right Col (7) Dashboard Panel Clone -->
+            <div class="md:col-span-7 relative md:-ml-6 reveal-up" id="hero-panel" style="transition-delay: 200ms;">
+                <div class="bg-surface border border-graphite-900/10 shadow-[0_24px_80px_rgba(14,15,17,0.08)] rounded-none overflow-hidden relative group">
+                    
+                    <!-- Dashboard Header -->
+                    <div class="border-b border-graphite-900/10 px-6 py-4 flex justify-between items-center bg-canvas/50">
+                        <div class="flex items-center gap-6">
+                            <span class="font-display font-semibold text-sm uppercase tracking-tight text-graphite-900">LADRILHO</span>
+                            <div class="hidden sm:flex items-center gap-4">
+                                <span class="font-mono text-xs tracking-[0.1em] text-graphite-900 uppercase flex items-center gap-1"><span class="w-1.5 h-1.5 bg-amber"></span> Overview</span>
+                                <span class="font-mono text-xs tracking-[0.1em] text-graphite-500 uppercase hover:text-graphite-900 cursor-pointer transition-colors">Leads</span>
+                                <span class="font-mono text-xs tracking-[0.1em] text-graphite-500 uppercase hover:text-graphite-900 cursor-pointer transition-colors">Pipelines</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <iconify-icon class="text-graphite-500 hover:text-graphite-900 transition-colors" icon="solar:bell-linear" width="18"></iconify-icon>
+                            <div class="flex items-center gap-2 border-l border-graphite-900/10 pl-4">
+                                <div class="w-6 h-6 bg-graphite-900 text-canvas flex items-center justify-center font-mono text-xs">DS</div>
+                                <span class="font-mono text-xs text-graphite-500 hidden sm:block">Design Spec, System</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Dashboard Content -->
+                    <div class="p-6 bg-surface">
+                        <!-- Top Bar -->
+                        <div class="flex justify-between items-end mb-8">
+                            <div>
+                                <h3 class="font-display font-normal text-lg mb-1">Active Pipeline</h3>
+                                <div class="flex items-center gap-2">
+                                    <span class="font-mono text-xs text-graphite-500 border border-graphite-900/10 px-2 py-0.5">Current Quarter</span>
+                                    <span class="font-mono text-xs text-amber bg-amber/10 px-2 py-0.5">+14.2% Growth</span>
+                                </div>
+                            </div>
+                            <div class="text-right group-hover:-translate-y-0.5 transition-transform duration-300">
+                                <span class="block font-mono text-xs text-graphite-500 mb-1 uppercase tracking-[0.06em]">Total Pipeline</span>
+                                <span class="font-mono text-2xl font-medium text-graphite-900 group-hover:text-amber transition-colors">$1,482,900.00</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Spark Cards Grid -->
+                        <div class="grid grid-cols-2 gap-4 mb-8">
+                            <!-- Card 1 -->
+                            <div class="border border-graphite-900/10 p-4 hover:border-amber/40 transition-colors cursor-pointer group/card flex justify-between items-start">
+                                <div>
+                                    <div class="flex items-center gap-2 mb-4">
+                                        <iconify-icon class="text-graphite-500" icon="solar:plane-linear" width="16"></iconify-icon>
+                                        <span class="font-display font-medium text-sm">New Deals</span>
+                                    </div>
+                                    <span class="font-mono text-xs text-graphite-500 uppercase">This Month</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="font-mono text-xs text-[#10B981] mb-2 block">↓ 8%</span>
+                                    <span class="font-mono text-sm font-medium text-graphite-900 group-hover/card:text-amber transition-colors">$320,000</span>
+                                </div>
+                            </div>
+                            <!-- Card 2 -->
+                            <div class="border border-graphite-900/10 p-4 hover:border-amber/40 transition-colors cursor-pointer group/card flex justify-between items-start">
+                                <div>
+                                    <div class="flex items-center gap-2 mb-4">
+                                        <iconify-icon class="text-graphite-500" icon="solar:monitor-linear" width="16"></iconify-icon>
+                                        <span class="font-display font-medium text-sm">Conversions</span>
+                                    </div>
+                                    <span class="font-mono text-xs text-graphite-500 uppercase">This Month</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="font-mono text-xs text-[#EF4444] mb-2 block">↑ 18%</span>
+                                    <span class="font-mono text-sm font-medium text-graphite-900 group-hover/card:text-amber transition-colors">$942,000</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- List -->
+                        <div>
+                            <span class="font-mono text-xs text-graphite-500 uppercase tracking-[0.1em] border-b border-graphite-900/10 pb-2 block w-full mb-2">Recent Activities</span>
+                            <div class="space-y-1">
+                                <div class="flex justify-between items-center py-2 px-2 hover:bg-canvas transition-colors text-xs">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-1.5 h-1.5 bg-[#10B981]"></div>
+                                        <span class="font-medium min-w-[120px]">Acme Corp Signed</span>
+                                        <span class="font-mono text-xs text-graphite-500 hidden sm:inline-block border border-graphite-900/10 px-1">Enterprise</span>
+                                    </div>
+                                    <span class="font-mono font-medium">$45,000.00</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 px-2 hover:bg-canvas transition-colors text-xs">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-1.5 h-1.5 bg-amber"></div>
+                                        <span class="font-medium min-w-[120px]">Globex Negotiation</span>
+                                        <span class="font-mono text-xs text-graphite-500 hidden sm:inline-block border border-graphite-900/10 px-1">Mid-Market</span>
+                                    </div>
+                                    <span class="font-mono font-medium">$12,800.00</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 px-2 hover:bg-canvas transition-colors text-xs">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-1.5 h-1.5 bg-[#EF4444]"></div>
+                                        <span class="font-medium min-w-[120px]">Initech Demo Booked</span>
+                                        <span class="font-mono text-xs text-graphite-500 hidden sm:inline-block border border-graphite-900/10 px-1">Commercial</span>
+                                    </div>
+                                    <span class="font-mono font-medium text-graphite-900">$0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Status Bar -->
+                    <div class="bg-graphite-900 py-2 px-6 flex justify-between items-center">
+                        <div class="flex items-center gap-2">
+                            <div class="w-1.5 h-1.5 bg-[#10B981] rounded-none animate-pulse"></div>
+                            <span class="font-mono text-xs text-surface/70 uppercase tracking-[0.1em]">All systems operational</span>
+                        </div>
+                        <span class="font-mono text-xs text-surface/50 uppercase tracking-[0.1em]">Last sync: 2s ago</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 1) TYPOGRAPHY SECTION -->
+    <section id="typography" class="py-section px-container relative bg-surface observe-section">
+        <div class="scan-line absolute top-0 left-0 w-full h-[1px] bg-graphite-900/10"></div>
+        <div class="max-w-[clamp(70rem,92vw,96rem)] mx-auto">
+            <span class="font-mono text-xs font-medium uppercase tracking-[0.18em] text-amber inline-block mb-4">[01] TYPOGRAPHY</span>
+            <h2 class="font-display font-light text-h2 leading-[1.1] tracking-tight text-graphite-900 mb-6">Type Specs & Scale</h2>
+            <p class="font-body text-graphite-500 max-w-[60ch] leading-relaxed text-sm md:text-base mb-12">
+                We employ three distinct families: **Space Grotesk** for clean, futuristic display styles, **Inter** for responsive body copy, and **IBM Plex Mono** for technical stats, tags, and statuses.
+            </p>
+
+            <!-- Spec Table / Vertical List -->
+            <div class="border border-graphite-900/10 divide-y divide-graphite-900/10 bg-canvas/10">
+                <!-- Heading 1 -->
+                <div class="p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="min-w-[160px] flex-shrink-0">
+                        <span class="font-mono text-xs font-bold text-graphite-900">Heading 1</span>
+                        <span class="block font-mono text-[10px] text-graphite-500">Space Grotesk Light</span>
+                    </div>
+                    <div class="flex-grow">
+                        <h1 class="font-display font-light text-h1 leading-[1.05] tracking-tight text-graphite-900">
+                            Every dollar spends. <span class="font-normal text-amber">Visible.</span>
+                        </h1>
+                    </div>
+                    <div class="text-right flex-shrink-0">
+                        <span class="font-mono text-xs text-graphite-500 block">clamp(2.75rem, 5.5vw, 5.25rem)</span>
+                        <span class="font-mono text-[10px] text-graphite-500 block">Line Height: 1.05</span>
+                    </div>
+                </div>
+
+                <!-- Heading 2 -->
+                <div class="p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="min-w-[160px] flex-shrink-0">
+                        <span class="font-mono text-xs font-bold text-graphite-900">Heading 2</span>
+                        <span class="block font-mono text-[10px] text-graphite-500">Space Grotesk Light</span>
+                    </div>
+                    <div class="flex-grow">
+                        <h2 class="font-display font-light text-h2 leading-[1.1] tracking-tight text-graphite-900">
+                            Smarter systems close books faster.
+                        </h2>
+                    </div>
+                    <div class="text-right flex-shrink-0">
+                        <span class="font-mono text-xs text-graphite-500 block">clamp(2rem, 3.5vw, 3.25rem)</span>
+                        <span class="font-mono text-[10px] text-graphite-500 block">Line Height: 1.1</span>
+                    </div>
+                </div>
+
+                <!-- Heading 3 -->
+                <div class="p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="min-w-[160px] flex-shrink-0">
+                        <span class="font-mono text-xs font-bold text-graphite-900">Heading 3</span>
+                        <span class="block font-mono text-[10px] text-graphite-500">Space Grotesk Normal</span>
+                    </div>
+                    <div class="flex-grow">
+                        <h3 class="font-display font-normal text-lg text-graphite-900">Company Spend Overview</h3>
+                    </div>
+                    <div class="text-right flex-shrink-0">
+                        <span class="font-mono text-xs text-graphite-500 block">1.125rem (18px)</span>
+                        <span class="font-mono text-[10px] text-graphite-500 block">Line Height: 1.75rem</span>
+                    </div>
+                </div>
+
+                <!-- Bold L / M / S -->
+                <div class="p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="min-w-[160px] flex-shrink-0">
+                        <span class="font-mono text-xs font-bold text-graphite-900">Bold L / Bold M</span>
+                        <span class="block font-mono text-[10px] text-graphite-500">Space Grotesk Semibold</span>
+                    </div>
+                    <div class="flex-grow">
+                        <span class="font-display font-semibold text-sm text-graphite-900 uppercase tracking-wider">LEDGR SYSTEM DEPARTMENTS</span>
+                    </div>
+                    <div class="text-right flex-shrink-0">
+                        <span class="font-mono text-xs text-graphite-500 block">0.875rem (14px)</span>
+                        <span class="font-mono text-[10px] text-graphite-500 block">Weight: 600</span>
+                    </div>
+                </div>
+
+                <!-- Paragraph Body -->
+                <div class="p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="min-w-[160px] flex-shrink-0">
+                        <span class="font-mono text-xs font-bold text-graphite-900">Paragraph</span>
+                        <span class="block font-mono text-[10px] text-graphite-500">Inter Regular</span>
+                    </div>
+                    <div class="flex-grow">
+                        <p class="font-body text-graphite-500 max-w-[50ch] text-sm md:text-base leading-relaxed">
+                            LEDGR gives finance teams real-time visibility into company spend — categorized, approved, and reconciled before the month closes.
+                        </p>
+                    </div>
+                    <div class="text-right flex-shrink-0">
+                        <span class="font-mono text-xs text-graphite-500 block">clamp(0.875rem, 1vw, 1rem)</span>
+                        <span class="font-mono text-[10px] text-graphite-500 block">Line Height: 1.625</span>
+                    </div>
+                </div>
+
+                <!-- Regular Mono Labels -->
+                <div class="p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="min-w-[160px] flex-shrink-0">
+                        <span class="font-mono text-xs font-bold text-graphite-900">Regular Mono</span>
+                        <span class="block font-mono text-[10px] text-graphite-500">IBM Plex Mono Regular</span>
+                    </div>
+                    <div class="flex-grow">
+                        <span class="font-mono text-xs text-graphite-500 uppercase tracking-[0.1em]">All systems operational</span>
+                    </div>
+                    <div class="text-right flex-shrink-0">
+                        <span class="font-mono text-xs text-graphite-500 block">0.75rem (12px)</span>
+                        <span class="font-mono text-[10px] text-graphite-500 block">Tracking: 0.1em</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 2) COLORS & SURFACES SECTION -->
+    <section id="colors" class="py-section px-container relative bg-canvas observe-section">
+        <div class="scan-line absolute top-0 left-0 w-full h-[1px] bg-graphite-900/10"></div>
+        <div class="max-w-[clamp(70rem,92vw,96rem)] mx-auto">
+            <span class="font-mono text-xs font-medium uppercase tracking-[0.18em] text-amber inline-block mb-4">[02] COLORS & SURFACES</span>
+            <h2 class="font-display font-light text-h2 leading-[1.1] tracking-tight text-graphite-900 mb-6">Color Swatches & Contexts</h2>
+            <p class="font-body text-graphite-500 max-w-[60ch] leading-relaxed text-sm md:text-base mb-12">
+                A highly cohesive system relying heavily on a dark graphite base, canvas surfaces, and warm amber accents to highlight interaction states.
+            </p>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-6">
+                <!-- Color 1: Graphite 900 -->
+                <div class="bg-surface border border-graphite-900/10 p-4">
+                    <div class="h-24 bg-graphite-900 mb-4 border border-graphite-900/10"></div>
+                    <span class="font-mono text-xs font-semibold text-graphite-900 block">Graphite 900</span>
+                    <span class="font-mono text-[10px] text-graphite-500 block">#0E0F11</span>
+                    <span class="font-mono text-[10px] text-graphite-500 block">bg-graphite-900</span>
+                </div>
+
+                <!-- Color 2: Graphite 800 -->
+                <div class="bg-surface border border-graphite-900/10 p-4">
+                    <div class="h-24 bg-graphite-800 mb-4 border border-graphite-900/10"></div>
+                    <span class="font-mono text-xs font-semibold text-graphite-900 block">Graphite 800</span>
+                    <span class="font-mono text-[10px] text-graphite-500 block">#1A1C20</span>
+                    <span class="font-mono text-[10px] text-graphite-500 block">bg-graphite-800</span>
+                </div>
+
+                <!-- Color 3: Graphite 700 -->
+                <div class="bg-surface border border-graphite-900/10 p-4">
+                    <div class="h-24 bg-graphite-700 mb-4 border border-graphite-900/10"></div>
+                    <span class="font-mono text-xs font-semibold text-graphite-900 block">Graphite 700</span>
+                    <span class="font-mono text-[10px] text-graphite-500 block">#2A2D35</span>
+                    <span class="font-mono text-[10px] text-graphite-500 block">bg-graphite-700</span>
+                </div>
+
+                <!-- Color 4: Graphite 500 -->
+                <div class="bg-surface border border-graphite-900/10 p-4">
+                    <div class="h-24 bg-graphite-500 mb-4 border border-graphite-900/10"></div>
+                    <span class="font-mono text-xs font-semibold text-graphite-900 block">Graphite 500</span>
+                    <span class="font-mono text-[10px] text-graphite-500 block">#5C5F66</span>
+                    <span class="font-mono text-[10px] text-graphite-500 block">bg-graphite-500</span>
+                </div>
+
+                <!-- Color 5: Amber Accent -->
+                <div class="bg-surface border border-graphite-900/10 p-4">
+                    <div class="h-24 bg-amber mb-4 border border-graphite-900/10"></div>
+                    <span class="font-mono text-xs font-semibold text-graphite-900 block">Amber</span>
+                    <span class="font-mono text-[10px] text-graphite-500 block">#E8A020</span>
+                    <span class="font-mono text-[10px] text-graphite-500 block">bg-amber</span>
+                </div>
+
+                <!-- Color 6: Amber Dark -->
+                <div class="bg-surface border border-graphite-900/10 p-4">
+                    <div class="h-24 bg-amberDark mb-4 border border-graphite-900/10"></div>
+                    <span class="font-mono text-xs font-semibold text-graphite-900 block">Amber Dark</span>
+                    <span class="font-mono text-[10px] text-graphite-500 block">#D18D1A</span>
+                    <span class="font-mono text-[10px] text-graphite-500 block">bg-amberDark</span>
+                </div>
+
+                <!-- Color 7: Canvas Background -->
+                <div class="bg-surface border border-graphite-900/10 p-4">
+                    <div class="h-24 bg-canvas mb-4 border border-graphite-900/10"></div>
+                    <span class="font-mono text-xs font-semibold text-graphite-900 block">Canvas</span>
+                    <span class="font-mono text-[10px] text-graphite-500 block">#F6F4F0</span>
+                    <span class="font-mono text-[10px] text-graphite-500 block">bg-canvas</span>
+                </div>
+
+                <!-- Color 8: Surface (White) -->
+                <div class="bg-surface border border-graphite-900/10 p-4">
+                    <div class="h-24 bg-surface mb-4 border border-graphite-900/10"></div>
+                    <span class="font-mono text-xs font-semibold text-graphite-900 block">Surface</span>
+                    <span class="font-mono text-[10px] text-graphite-500 block">#FFFFFF</span>
+                    <span class="font-mono text-[10px] text-graphite-500 block">bg-surface</span>
+                </div>
+            </div>
+            
+            <!-- Contextual Surfaces Showcase -->
+            <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="border border-graphite-900/10 p-6 bg-surface">
+                    <h4 class="font-mono text-xs font-bold uppercase tracking-wider mb-2 text-graphite-900">Surface Card Context</h4>
+                    <p class="font-body text-sm text-graphite-500 mb-4">
+                        Used for main components, dashboard content sections, and overlay widgets over a canvas backdrop.
+                    </p>
+                    <span class="font-mono text-[10px] text-graphite-500 uppercase">Class: bg-surface border border-graphite-900/10</span>
+                </div>
+                <div class="border border-graphite-900/10 p-6 bg-graphite-900 text-surface">
+                    <h4 class="font-mono text-xs font-bold uppercase tracking-wider mb-2 text-surface">Contrast Card Context</h4>
+                    <p class="font-body text-sm text-surface/75 mb-4">
+                        Used for high-priority marketing blocks, footers, system bars, and highlighted dashboard modules.
+                    </p>
+                    <span class="font-mono text-[10px] text-surface/50 uppercase">Class: bg-graphite-900 text-surface</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3) UI COMPONENTS SECTION -->
+    <section id="components" class="py-section px-container relative bg-surface observe-section">
+        <div class="scan-line absolute top-0 left-0 w-full h-[1px] bg-graphite-900/10"></div>
+        <div class="max-w-[clamp(70rem,92vw,96rem)] mx-auto">
+            <span class="font-mono text-xs font-medium uppercase tracking-[0.18em] text-amber inline-block mb-4">[03] UI COMPONENTS</span>
+            <h2 class="font-display font-light text-h2 leading-[1.1] tracking-tight text-graphite-900 mb-6">Interactive Element Specs</h2>
+            <p class="font-body text-graphite-500 max-w-[60ch] leading-relaxed text-sm md:text-base mb-12">
+                All components preserve clean typographic lines, explicit grid boundaries, custom focus borders, and Swiss ease hover states.
+            </p>
+
+            <div class="space-y-12">
+                <!-- Sub Section: Buttons -->
+                <div>
+                    <h3 class="font-mono text-xs font-bold uppercase tracking-widest text-graphite-900 border-b border-graphite-900/10 pb-2 mb-6">Button Hierarchy</h3>
+                    <div class="flex flex-wrap gap-6 items-end">
+                        <!-- Primary graphite button -->
+                        <div class="flex flex-col gap-2">
+                            <span class="font-mono text-[10px] text-graphite-500 uppercase">Primary / Graphite</span>
+                            <a class="relative inline-flex items-center justify-center px-6 py-3 font-mono text-xs font-semibold uppercase tracking-[0.1em] text-surface bg-gradient-to-b from-graphite-800 to-graphite-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_4px_20px_rgba(14,15,17,0.2)] rounded-none group hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_8px_32px_rgba(14,15,17,0.3)] transition-all duration-300 hover:-translate-y-0.5 overflow-hidden" href="#demo">
+                                <span class="relative z-10 flex items-center gap-2">Request Demo <iconify-icon icon="solar:arrow-right-linear" width="14"></iconify-icon></span>
+                                <div class="absolute inset-0 bg-white/5 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-swiss"></div>
+                            </a>
+                        </div>
+                        
+                        <!-- Accent amber button -->
+                        <div class="flex flex-col gap-2">
+                            <span class="font-mono text-[10px] text-graphite-500 uppercase">Accent / Amber</span>
+                            <a class="relative inline-flex items-center justify-center px-6 py-3 font-mono text-xs font-semibold uppercase tracking-[0.1em] text-graphite-900 bg-gradient-to-b from-amber to-amberDark shadow-[inset_0_1px_0_rgba(255,255,255,0.4),0_2px_10px_rgba(232,160,32,0.2)] rounded-none group hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.4),0_6px_20px_rgba(232,160,32,0.4)] transition-all duration-300 hover:-translate-y-0.5 overflow-hidden" href="#demo">
+                                <span class="relative z-10 flex items-center gap-2">Book My Demo <iconify-icon icon="solar:arrow-right-linear" width="14"></iconify-icon></span>
+                                <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-swiss"></div>
+                            </a>
+                        </div>
+
+                        <!-- Secondary outlined button -->
+                        <div class="flex flex-col gap-2">
+                            <span class="font-mono text-[10px] text-graphite-500 uppercase">Secondary / Outlined</span>
+                            <a class="inline-flex items-center justify-center px-6 py-3 font-mono text-xs font-medium uppercase tracking-[0.1em] text-graphite-900 bg-surface border border-graphite-900/10 shadow-[0_2px_10px_rgba(14,15,17,0.02)] rounded-none hover:shadow-[0_8px_24px_rgba(14,15,17,0.06)] hover:border-graphite-900/20 transition-all duration-300 hover:-translate-y-0.5 group" href="#product">
+                                See it live <iconify-icon class="ml-2 text-graphite-500 group-hover:text-amber transition-colors" icon="solar:play-circle-linear" width="16"></iconify-icon>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sub Section: Inputs & Fields -->
+                <div>
+                    <h3 class="font-mono text-xs font-bold uppercase tracking-widest text-graphite-900 border-b border-graphite-900/10 pb-2 mb-6">Forms & Inputs</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Input Field -->
+                        <div class="flex flex-col gap-2">
+                            <span class="font-mono text-[10px] text-graphite-500 uppercase">Text Input (Default / Focus)</span>
+                            <input class="w-full bg-canvas border border-graphite-900/20 px-4 py-3 font-mono text-xs text-graphite-900 placeholder:text-graphite-500/50 focus:outline-none focus:border-amber focus:ring-1 focus:ring-amber rounded-none transition-colors" placeholder="YOUR NAME" type="text"/>
+                        </div>
+
+                        <!-- Select Dropdown -->
+                        <div class="flex flex-col gap-2">
+                            <span class="font-mono text-[10px] text-graphite-500 uppercase">Select Dropdown (Custom Arrow)</span>
+                            <div class="relative">
+                                <select class="w-full bg-canvas border border-graphite-900/20 px-4 py-3 font-mono text-xs text-graphite-900 focus:outline-none focus:border-amber focus:ring-1 focus:ring-amber rounded-none transition-colors appearance-none cursor-pointer">
+                                    <option disabled="" selected="" value="">COMPANY SIZE</option>
+                                    <option value="10-50">10–50 EMPLOYEES</option>
+                                    <option value="51-200">51–200 EMPLOYEES</option>
+                                </select>
+                                <iconify-icon class="absolute right-4 top-1/2 -translate-y-1/2 text-graphite-500 pointer-events-none" icon="solar:alt-arrow-down-linear"></iconify-icon>
+                            </div>
+                        </div>
+
+                        <!-- Disabled Input -->
+                        <div class="flex flex-col gap-2">
+                            <span class="font-mono text-[10px] text-graphite-500 uppercase">Disabled Input</span>
+                            <input disabled class="w-full bg-canvas/50 border border-graphite-900/5 px-4 py-3 font-mono text-xs text-graphite-900/30 placeholder:text-graphite-500/30 rounded-none cursor-not-allowed" placeholder="DISABLED FIELD" type="text"/>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sub Section: Cards & Lists -->
+                <div>
+                    <h3 class="font-mono text-xs font-bold uppercase tracking-widest text-graphite-900 border-b border-graphite-900/10 pb-2 mb-6">Cards & Lists</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Problem Card -->
+                        <div class="bg-surface border border-graphite-900/10 p-card relative group hover:shadow-[0_8px_32px_rgba(14,15,17,0.06)] transition-all duration-400">
+                            <!-- Indicator -->
+                            <div class="absolute left-0 top-0 bottom-0 w-[2px] bg-amber scale-y-0 origin-top transition-transform duration-300 group-hover:scale-y-100"></div>
+                            <h3 class="font-mono text-xs font-semibold uppercase tracking-[0.1em] text-graphite-900 mb-4">Receipts Without Context.</h3>
+                            <p class="font-body text-sm text-graphite-500 leading-relaxed">
+                                67% of expense reports are missing required documentation. Your team finds out at review, not at submission.
+                            </p>
+                        </div>
+
+                        <!-- Spark Metric Card -->
+                        <div class="border border-graphite-900/10 p-4 bg-surface hover:border-amber/40 transition-colors cursor-pointer group/card flex justify-between items-start">
+                            <div>
+                                <div class="flex items-center gap-2 mb-4">
+                                    <iconify-icon class="text-graphite-500" icon="solar:plane-linear" width="16"></iconify-icon>
+                                    <span class="font-display font-medium text-sm">Travel Deals</span>
+                                </div>
+                                <span class="font-mono text-xs text-graphite-500 uppercase">Active Status</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="font-mono text-xs text-[#10B981] mb-2 block">↓ 12%</span>
+                                <span class="font-mono text-sm font-medium text-graphite-900 group-hover/card:text-amber transition-colors">$82,400</span>
+                            </div>
+                        </div>
+
+                        <!-- Partner / Logo Grid Item -->
+                        <div class="flex flex-col items-center justify-center group cursor-pointer">
+                            <div class="w-20 h-20 bg-surface border border-graphite-900/10 shadow-sm group-hover:shadow-[0_8px_24px_rgba(14,15,17,0.06)] group-hover:border-amber/40 transition-all duration-300 flex items-center justify-center mb-4 relative overflow-hidden">
+                                <div class="absolute inset-0 bg-gradient-to-br from-amber/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                <span class="font-display font-semibold text-2xl tracking-tighter text-graphite-900 group-hover:scale-105 transition-transform duration-300 relative z-10">NS</span>
+                            </div>
+                            <span class="font-display font-medium text-sm text-graphite-900 mb-1">NetSuite</span>
+                            <span class="font-mono text-xs text-graphite-500 uppercase tracking-widest border border-graphite-900/10 bg-surface px-2 py-0.5">ERP</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4) LAYOUT & SPACING SECTION -->
+    <section id="layout" class="py-section px-container relative bg-canvas observe-section">
+        <div class="scan-line absolute top-0 left-0 w-full h-[1px] bg-graphite-900/10"></div>
+        <div class="max-w-[clamp(70rem,92vw,96rem)] mx-auto">
+            <span class="font-mono text-xs font-medium uppercase tracking-[0.18em] text-amber inline-block mb-4">[04] LAYOUT & SPACING</span>
+            <h2 class="font-display font-light text-h2 leading-[1.1] tracking-tight text-graphite-900 mb-6">Grid, Spacing & Sizing Rules</h2>
+            <p class="font-body text-graphite-500 max-w-[60ch] leading-relaxed text-sm md:text-base mb-12">
+                System layouts rely strictly on structural containers, responsive spacing clamps, and structured divide-borders to organize visual content columns.
+            </p>
+
+            <div class="space-y-12">
+                <!-- Spacing Tokens -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="border border-graphite-900/10 bg-surface p-6">
+                        <span class="font-mono text-xs font-semibold text-graphite-900 block mb-2">Section Padding</span>
+                        <div class="h-6 bg-graphite-500 mb-4 relative flex items-center justify-center text-canvas font-mono text-[10px]">
+                            9vw Clamp Space
+                        </div>
+                        <span class="font-mono text-[10px] text-graphite-500 uppercase block">Class: py-section</span>
+                        <span class="font-mono text-[10px] text-graphite-500 block">clamp(5.5rem, 9vw, 11rem)</span>
+                    </div>
+
+                    <div class="border border-graphite-900/10 bg-surface p-6">
+                        <span class="font-mono text-xs font-semibold text-graphite-900 block mb-2">Container Padding</span>
+                        <div class="h-6 bg-graphite-900 mb-4 relative flex items-center justify-center text-canvas font-mono text-[10px]">
+                            5vw Horizontal Margin
+                        </div>
+                        <span class="font-mono text-[10px] text-graphite-500 uppercase block">Class: px-container</span>
+                        <span class="font-mono text-[10px] text-graphite-500 block">clamp(1.5rem, 5vw, 4rem)</span>
+                    </div>
+
+                    <div class="border border-graphite-900/10 bg-surface p-6">
+                        <span class="font-mono text-xs font-semibold text-graphite-900 block mb-2">Card Padding</span>
+                        <div class="h-6 bg-amber mb-4 relative flex items-center justify-center text-graphite-900 font-mono text-[10px]">
+                            2.5vw Card Padding
+                        </div>
+                        <span class="font-mono text-[10px] text-graphite-500 uppercase block">Class: p-card</span>
+                        <span class="font-mono text-[10px] text-graphite-500 block">clamp(1.75rem, 2.5vw, 2.5rem)</span>
+                    </div>
+                </div>
+
+                <!-- Sticky Split Column Pattern -->
+                <div>
+                    <h3 class="font-mono text-xs font-bold uppercase tracking-widest text-graphite-900 border-b border-graphite-900/10 pb-2 mb-6">Sticky Split Layout Pattern</h3>
+                    <div class="border border-graphite-900/10 p-6 bg-surface">
+                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                            <div class="lg:col-span-4 border border-dashed border-graphite-900/25 p-4 rounded-none font-mono text-xs text-graphite-500">
+                                <strong>Left Column (lg:col-span-4 lg:sticky lg:top-32)</strong><br/><br/>
+                                This section stays locked on scroll, introducing the context, while the user scrolls past the catalog on the right.
+                            </div>
+                            <div class="lg:col-span-8 space-y-4">
+                                <div class="border border-graphite-900/10 p-4 font-mono text-xs text-graphite-500">Right Column Segment 1 (lg:col-span-8)</div>
+                                <div class="border border-graphite-900/10 p-4 font-mono text-xs text-graphite-500">Right Column Segment 2 (lg:col-span-8)</div>
+                                <div class="border border-graphite-900/10 p-4 font-mono text-xs text-graphite-500">Right Column Segment 3 (lg:col-span-8)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5) MOTION & INTERACTION SECTION -->
+    <section id="motion" class="py-section px-container relative bg-surface observe-section">
+        <div class="scan-line absolute top-0 left-0 w-full h-[1px] bg-graphite-900/10"></div>
+        <div class="max-w-[clamp(70rem,92vw,96rem)] mx-auto">
+            <span class="font-mono text-xs font-medium uppercase tracking-[0.18em] text-amber inline-block mb-4">[05] MOTION & INTERACTION</span>
+            <h2 class="font-display font-light text-h2 leading-[1.1] tracking-tight text-graphite-900 mb-6">Interactions & Transitions</h2>
+            <p class="font-body text-graphite-500 max-w-[60ch] leading-relaxed text-sm md:text-base mb-12">
+                All visual state updates utilize the custom Swiss curve `cubic-bezier(0.16, 1, 0.3, 1)`. Use the gallery below to preview and test the motion logic.
+            </p>
+
+            <div class="space-y-12">
+                <!-- Entrance Animations & Sweeps -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Reveal Up Spec -->
+                    <div class="border border-graphite-900/10 p-6 bg-canvas/30 flex flex-col justify-between">
+                        <div>
+                            <span class="font-mono text-xs font-semibold text-graphite-900 block mb-2">Scroll Entrance (reveal-up)</span>
+                            <p class="font-body text-xs text-graphite-500 mb-6">
+                                Elements start at `opacity: 0` and `transform: translateY(18px)`. They transition to default states once viewport intersections occur.
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <button id="trigger-reveal" class="relative inline-flex items-center justify-center px-4 py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-surface bg-graphite-900 shadow-sm rounded-none overflow-hidden">
+                                <span class="relative z-10">Trigger Animation</span>
+                            </button>
+                            <div id="reveal-test-box" class="w-12 h-12 bg-amber reveal-up is-visible"></div>
+                        </div>
+                    </div>
+
+                    <!-- Scan Line sweep -->
+                    <div class="border border-graphite-900/10 p-6 bg-canvas/30 flex flex-col justify-between">
+                        <div>
+                            <span class="font-mono text-xs font-semibold text-graphite-900 block mb-2">Border Scan Line (scan-line)</span>
+                            <p class="font-body text-xs text-graphite-500 mb-6">
+                                horizontal separator rules scale out from left-to-right (`scaleX(0) -> scaleX(1)`) on view entry.
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <button id="trigger-scan" class="relative inline-flex items-center justify-center px-4 py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-surface bg-graphite-900 shadow-sm rounded-none overflow-hidden">
+                                <span class="relative z-10">Trigger Scan</span>
+                            </button>
+                            <div class="flex-grow h-[1px] bg-graphite-900/20 relative">
+                                <div id="scan-test-line" class="absolute inset-0 bg-amber origin-left scan-line is-visible"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Workflow Loop Simulator -->
+                <div class="border border-graphite-900/10 p-8 bg-graphite-900 text-surface">
+                    <span class="font-mono text-xs font-bold uppercase tracking-widest text-amber block mb-2">[04] PIPELINE VISUALIZER</span>
+                    <h3 class="font-display font-light text-xl mb-4">Pipeline Workflow Token Loop</h3>
+                    <p class="font-body text-xs text-surface/70 mb-8 max-w-xl">
+                        Simulates workflow progression by sliding an absolute animated token along a line, highlighting respective stages on impact.
+                    </p>
+
+                    <!-- Pipeline Animator -->
+                    <div class="w-full relative py-12" id="workflow-visualizer">
+                        <!-- Background Connection Line -->
+                        <div class="absolute top-[3.25rem] left-8 right-8 h-[1px] bg-surface/10 z-0"></div>
+                        
+                        <!-- Step 1 -->
+                        <div class="grid grid-cols-4 w-full relative z-10">
+                            <div class="flex flex-col items-center step-node">
+                                <div class="w-10 h-10 rounded-none bg-graphite-800 border border-surface/20 flex items-center justify-center mb-3 step-icon transition-all duration-300">
+                                    <iconify-icon class="text-surface/50" icon="solar:document-text-linear" width="16"></iconify-icon>
+                                </div>
+                                <span class="font-mono text-[10px] tracking-wider uppercase text-surface">Capture</span>
+                            </div>
+                            <!-- Step 2 -->
+                            <div class="flex flex-col items-center step-node">
+                                <div class="w-10 h-10 rounded-none bg-graphite-800 border border-surface/20 flex items-center justify-center mb-3 step-icon transition-all duration-300">
+                                    <iconify-icon class="text-surface/50" icon="solar:shield-check-linear" width="16"></iconify-icon>
+                                </div>
+                                <span class="font-mono text-[10px] tracking-wider uppercase text-surface">Check</span>
+                            </div>
+                            <!-- Step 3 -->
+                            <div class="flex flex-col items-center step-node">
+                                <div class="w-10 h-10 rounded-none bg-graphite-800 border border-surface/20 flex items-center justify-center mb-3 step-icon transition-all duration-300">
+                                    <iconify-icon class="text-surface/50" icon="solar:user-check-linear" width="16"></iconify-icon>
+                                </div>
+                                <span class="font-mono text-[10px] tracking-wider uppercase text-surface">Approve</span>
+                            </div>
+                            <!-- Step 4 -->
+                            <div class="flex flex-col items-center step-node">
+                                <div class="w-10 h-10 rounded-none bg-graphite-800 border border-surface/20 flex items-center justify-center mb-3 step-icon transition-all duration-300">
+                                    <iconify-icon class="text-surface/50" icon="solar:round-transfer-linear" width="16"></iconify-icon>
+                                </div>
+                                <span class="font-mono text-[10px] tracking-wider uppercase text-surface">Sync</span>
+                            </div>
+                        </div>
+
+                        <!-- Animated Token -->
+                        <div class="absolute top-[2.75rem] w-4 h-4 bg-amber border-2 border-graphite-900 rounded-none shadow-[0_0_10px_rgba(232,160,32,0.6)] z-20 pointer-events-none opacity-0" id="expense-token"></div>
+                    </div>
+                </div>
+
+                <!-- WebGL Approximation Canvas Showcase -->
+                <div>
+                    <h3 class="font-mono text-xs font-bold uppercase tracking-widest text-graphite-900 border-b border-graphite-900/10 pb-2 mb-6">Interactive WebGL Approximation (Canvas)</h3>
+                    <div class="border border-graphite-900/10 bg-canvas/30 p-4 relative h-[300px] overflow-hidden">
+                        <canvas class="absolute inset-0 w-full h-full pointer-events-none opacity-[0.85] mix-blend-multiply" id="motion-canvas"></canvas>
+                        <div class="relative z-10 flex flex-col justify-between h-full pointer-events-none">
+                            <span class="font-mono text-[10px] text-graphite-500 uppercase">Live Canvas Network Rendering</span>
+                            <p class="font-body text-xs text-graphite-500 max-w-xs">
+                                Move your cursor over this section to repel particles and interact with the connecting amber nodes in real-time.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6) ICONS SECTION -->
+    <section id="icons" class="py-section px-container relative bg-canvas observe-section">
+        <div class="scan-line absolute top-0 left-0 w-full h-[1px] bg-graphite-900/10"></div>
+        <div class="max-w-[clamp(70rem,92vw,96rem)] mx-auto">
+            <span class="font-mono text-xs font-medium uppercase tracking-[0.18em] text-amber inline-block mb-4">[06] ICONS</span>
+            <h2 class="font-display font-light text-h2 leading-[1.1] tracking-tight text-graphite-900 mb-6">Semantic Icon Grid</h2>
+            <p class="font-body text-graphite-500 max-w-[60ch] leading-relaxed text-sm md:text-base mb-12">
+                We use the standard Solar Linear Iconify icons. Each icon is styled to inherit currentColor and adapts sizing to the surrounding text layout.
+            </p>
+
+            <div class="grid grid-cols-3 sm:grid-cols-6 gap-6">
+                <!-- Icon 1 -->
+                <div class="border border-graphite-900/10 bg-surface p-4 flex flex-col items-center justify-center gap-3">
+                    <iconify-icon class="text-graphite-900" icon="solar:arrow-right-linear" width="24"></iconify-icon>
+                    <span class="font-mono text-[9px] text-graphite-500 text-center">arrow-right</span>
+                </div>
+                <!-- Icon 2 -->
+                <div class="border border-graphite-900/10 bg-surface p-4 flex flex-col items-center justify-center gap-3">
+                    <iconify-icon class="text-graphite-900" icon="solar:calendar-linear" width="24"></iconify-icon>
+                    <span class="font-mono text-[9px] text-graphite-500 text-center">calendar</span>
+                </div>
+                <!-- Icon 3 -->
+                <div class="border border-graphite-900/10 bg-surface p-4 flex flex-col items-center justify-center gap-3">
+                    <iconify-icon class="text-graphite-900" icon="solar:play-circle-linear" width="24"></iconify-icon>
+                    <span class="font-mono text-[9px] text-graphite-500 text-center">play-circle</span>
+                </div>
+                <!-- Icon 4 -->
+                <div class="border border-graphite-900/10 bg-surface p-4 flex flex-col items-center justify-center gap-3">
+                    <iconify-icon class="text-graphite-900" icon="solar:plane-linear" width="24"></iconify-icon>
+                    <span class="font-mono text-[9px] text-graphite-500 text-center">plane</span>
+                </div>
+                <!-- Icon 5 -->
+                <div class="border border-graphite-900/10 bg-surface p-4 flex flex-col items-center justify-center gap-3">
+                    <iconify-icon class="text-graphite-900" icon="solar:monitor-linear" width="24"></iconify-icon>
+                    <span class="font-mono text-[9px] text-graphite-500 text-center">monitor</span>
+                </div>
+                <!-- Icon 6 -->
+                <div class="border border-graphite-900/10 bg-surface p-4 flex flex-col items-center justify-center gap-3">
+                    <iconify-icon class="text-graphite-900" icon="solar:bell-linear" width="24"></iconify-icon>
+                    <span class="font-mono text-[9px] text-graphite-500 text-center">bell</span>
+                </div>
+                <!-- Icon 7 -->
+                <div class="border border-graphite-900/10 bg-surface p-4 flex flex-col items-center justify-center gap-3">
+                    <iconify-icon class="text-graphite-900" icon="solar:alt-arrow-down-linear" width="24"></iconify-icon>
+                    <span class="font-mono text-[9px] text-graphite-500 text-center">alt-arrow-down</span>
+                </div>
+                <!-- Icon 8 -->
+                <div class="border border-graphite-900/10 bg-surface p-4 flex flex-col items-center justify-center gap-3">
+                    <iconify-icon class="text-graphite-900" icon="solar:twitter-linear" width="24"></iconify-icon>
+                    <span class="font-mono text-[9px] text-graphite-500 text-center">twitter</span>
+                </div>
+                <!-- Icon 9 -->
+                <div class="border border-graphite-900/10 bg-surface p-4 flex flex-col items-center justify-center gap-3">
+                    <iconify-icon class="text-graphite-900" icon="solar:linkedin-linear" width="24"></iconify-icon>
+                    <span class="font-mono text-[9px] text-graphite-500 text-center">linkedin</span>
+                </div>
+                <!-- Icon 10 -->
+                <div class="border border-graphite-900/10 bg-surface p-4 flex flex-col items-center justify-center gap-3">
+                    <iconify-icon class="text-graphite-900" icon="solar:document-text-linear" width="24"></iconify-icon>
+                    <span class="font-mono text-[9px] text-graphite-500 text-center">document-text</span>
+                </div>
+                <!-- Icon 11 -->
+                <div class="border border-graphite-900/10 bg-surface p-4 flex flex-col items-center justify-center gap-3">
+                    <iconify-icon class="text-graphite-900" icon="solar:shield-check-linear" width="24"></iconify-icon>
+                    <span class="font-mono text-[9px] text-graphite-500 text-center">shield-check</span>
+                </div>
+                <!-- Icon 12 -->
+                <div class="border border-graphite-900/10 bg-surface p-4 flex flex-col items-center justify-center gap-3">
+                    <iconify-icon class="text-graphite-900" icon="solar:user-check-linear" width="24"></iconify-icon>
+                    <span class="font-mono text-[9px] text-graphite-500 text-center">user-check</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-graphite-900 text-surface pt-16 pb-10 px-container relative overflow-hidden border-t border-surface/10">
+        <div class="max-w-[clamp(70rem,92vw,96rem)] mx-auto relative z-10 text-center">
+            <span class="font-mono text-xs text-surface/50 uppercase tracking-widest block mb-4">LADRILHO CRM CONCEPT</span>
+            <p class="font-body text-xs text-surface/70 max-w-sm mx-auto leading-relaxed mb-8">
+                Designed to act as a direct blueprint and design spec tool for building and scaling CRM layouts.
+            </p>
+            <div class="border-t border-surface/10 pt-8 font-mono text-[10px] text-surface/50 uppercase tracking-widest">
+                LADRILHO CRM © 2026. ALL SPECIFICATIONS EXTRACTED AND DOCUMENTED.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts for Interactions & WebGL particle approximation -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // 1. Navigation Scroll Effect
+            const nav = document.getElementById('navbar');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    nav.classList.replace('bg-transparent', 'bg-surface/90');
+                    nav.classList.replace('border-transparent', 'border-graphite-900/10');
+                    nav.style.backdropFilter = 'blur(8px)';
+                } else {
+                    nav.classList.replace('bg-surface/90', 'bg-transparent');
+                    nav.classList.replace('border-graphite-900/10', 'border-transparent');
+                    nav.style.backdropFilter = 'none';
+                }
+            });
+
+            // 2. Intersection Observer for Reveals and Scan Lines
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.15
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const reveals = entry.target.querySelectorAll('.reveal-up');
+                        reveals.forEach(el => el.classList.add('is-visible'));
+
+                        const scanLine = entry.target.querySelector('.scan-line');
+                        if (scanLine) scanLine.classList.add('is-visible');
+
+                        // Handle workflow animation trigger
+                        if (entry.target.id === 'workflow-visualizer' || entry.target.querySelector('#workflow-visualizer')) {
+                            const visualizer = document.getElementById('workflow-visualizer');
+                            if (visualizer && !visualizer.hasAttribute('data-animated')) {
+                                animateWorkflow();
+                                visualizer.setAttribute('data-animated', 'true');
+                            }
+                        }
+
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.observe-section').forEach(section => {
+                observer.observe(section);
+            });
+
+            // Immediately reveal Hero elements
+            document.querySelectorAll('#hero .reveal-up').forEach(el => {
+                setTimeout(() => el.classList.add('is-visible'), 100);
+            });
+
+            // 3. Workflow Visualizer Looping Animation
+            function animateWorkflow() {
+                const token = document.getElementById('expense-token');
+                const nodes = document.querySelectorAll('.step-node');
+                if(!token || nodes.length === 0) return;
+                
+                const columns = 4;
+                let currentStep = 0;
+                
+                const reset = () => {
+                    token.style.transition = 'none';
+                    token.style.left = '2rem';
+                    token.style.opacity = '0';
+                    
+                    nodes.forEach((n) => {
+                        const icon = n.querySelector('.step-icon');
+                        icon.classList.remove('bg-amber/20', 'border-amber/50', 'shadow-[0_0_20px_rgba(232,160,32,0.3)]');
+                        icon.classList.add('bg-graphite-800', 'border-surface/20');
+                        icon.querySelector('iconify-icon').classList.replace('text-amber', 'text-surface/50');
+                    });
+                    
+                    currentStep = 0;
+                    
+                    setTimeout(() => {
+                        token.style.transition = 'all 0.8s cubic-bezier(0.16, 1, 0.3, 1)';
+                        token.style.opacity = '1';
+                        setTimeout(moveToken, 200);
+                    }, 50);
+                };
+
+                const moveToken = () => {
+                    if (currentStep >= columns) {
+                        setTimeout(reset, 2000);
+                        return;
+                    }
+                    
+                    const currentNode = nodes[currentStep];
+                    if(currentNode) {
+                        const icon = currentNode.querySelector('.step-icon');
+                        icon.classList.remove('bg-graphite-800', 'border-surface/20');
+                        icon.classList.add('bg-amber/20', 'border-amber/50', 'shadow-[0_0_20px_rgba(232,160,32,0.3)]');
+                        icon.querySelector('iconify-icon').classList.replace('text-surface/50', 'text-amber');
+                    }
+                    
+                    if(window.innerWidth >= 768) {
+                        token.style.left = currentStep === 0 ? '2rem' : `calc(${currentStep * 25}% + 2rem)`;
+                    } else {
+                        token.style.opacity = '0';
+                    }
+                    
+                    currentStep++;
+                    setTimeout(moveToken, 1400);
+                };
+                
+                reset();
+            }
+
+            // 4. Parallax for Hero Panel
+            const heroPanel = document.getElementById('hero-panel');
+            if (heroPanel) {
+                window.addEventListener('scroll', () => {
+                    const scrollY = window.scrollY;
+                    if (scrollY < window.innerHeight) {
+                        const yPos = (scrollY * -0.05);
+                        heroPanel.style.transform = `translateY(${yPos}px)`;
+                    }
+                });
+            }
+
+            // 5. Canvas Particle Network Generator Function
+            function initParticleNetwork(canvasId) {
+                const canvas = document.getElementById(canvasId);
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                let width, height;
+                let particles = [];
+                const particleCount = 80;
+                let mouse = { x: -1000, y: -1000 };
+
+                function initSize() {
+                    const parent = canvas.parentElement;
+                    width = canvas.width = parent.offsetWidth;
+                    height = canvas.height = parent.offsetHeight;
+                    
+                    particles = [];
+                    for (let i = 0; i < particleCount; i++) {
+                        particles.push({
+                            x: Math.random() * width,
+                            y: Math.random() * height,
+                            vx: (Math.random() - 0.5) * 0.3,
+                            vy: (Math.random() - 0.5) * 0.3
+                        });
+                    }
+                }
+
+                initSize();
+                window.addEventListener('resize', initSize);
+
+                canvas.parentElement.addEventListener('mousemove', (e) => {
+                    const rect = canvas.getBoundingClientRect();
+                    mouse.x = e.clientX - rect.left;
+                    mouse.y = e.clientY - rect.top;
+                });
+                canvas.parentElement.addEventListener('mouseleave', () => {
+                    mouse.x = -1000; mouse.y = -1000;
+                });
+
+                function draw() {
+                    ctx.clearRect(0, 0, width, height);
+
+                    for (let i = 0; i < particleCount; i++) {
+                        let p = particles[i];
+                        p.x += p.vx;
+                        p.y += p.vy;
+
+                        if (p.x < 0 || p.x > width) p.vx *= -1;
+                        if (p.y < 0 || p.y > height) p.vy *= -1;
+
+                        // Mouse repulsion
+                        let dx = mouse.x - p.x;
+                        let dy = mouse.y - p.y;
+                        let dist = Math.sqrt(dx*dx + dy*dy);
+                        if (dist < 100) {
+                            p.x -= dx * 0.02;
+                            p.y -= dy * 0.02;
+                        }
+
+                        // Dot
+                        ctx.fillStyle = 'rgba(14, 15, 17, 0.35)';
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, 1.2, 0, Math.PI * 2);
+                        ctx.fill();
+
+                        // Connections
+                        for (let j = i + 1; j < particleCount; j++) {
+                            let p2 = particles[j];
+                            let d2x = p.x - p2.x;
+                            let d2y = p.y - p2.y;
+                            let dist2 = Math.sqrt(d2x*d2x + d2y*d2y);
+
+                            if (dist2 < 75) {
+                                ctx.beginPath();
+                                ctx.strokeStyle = `rgba(232, 160, 32, ${0.1 * (1 - dist2/75)})`;
+                                ctx.lineWidth = 0.5;
+                                ctx.moveTo(p.x, p.y);
+                                ctx.lineTo(p2.x, p2.y);
+                                ctx.stroke();
+                            }
+                        }
+                    }
+                    requestAnimationFrame(draw);
+                }
+                draw();
+            }
+
+            // Initialize both canvases
+            if (window.innerWidth >= 768) {
+                initParticleNetwork('hero-canvas');
+                initParticleNetwork('motion-canvas');
+            }
+
+            // 6. Manual trigger button event listeners (for showcase previews)
+            const revealBtn = document.getElementById('trigger-reveal');
+            const revealBox = document.getElementById('reveal-test-box');
+            if (revealBtn && revealBox) {
+                revealBtn.addEventListener('click', () => {
+                    revealBox.classList.remove('is-visible');
+                    revealBox.style.opacity = '0';
+                    revealBox.style.transform = 'translateY(18px)';
+                    setTimeout(() => {
+                        revealBox.style.transition = 'opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1)';
+                        revealBox.classList.add('is-visible');
+                    }, 100);
+                });
+            }
+
+            const scanBtn = document.getElementById('trigger-scan');
+            const scanLine = document.getElementById('scan-test-line');
+            if (scanBtn && scanLine) {
+                scanBtn.addEventListener('click', () => {
+                    scanLine.classList.remove('is-visible');
+                    scanLine.style.transform = 'scaleX(0)';
+                    setTimeout(() => {
+                        scanLine.classList.add('is-visible');
+                    }, 100);
+                });
+            }
+        });
+    </script>
+</body>
+</html>

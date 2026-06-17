@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html class="scroll-smooth antialiased font-body" lang="pt-br">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Dalle Piagge Ladrilhos | Atendimento</title>
+    
+    <!-- Fonts from Google Fonts CDN -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+    
+    <!-- Tailwind CSS from CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Iconify from CDN -->
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        graphite: {
+                            900: '#0E0F11',
+                            800: '#1A1C20',
+                            700: '#2A2D35',
+                            500: '#5C5F66',
+                            300: '#8E919A',
+                            100: '#EAECEE',
+                        },
+                        amber: '#E8A020',
+                        amberDark: '#D18D1A',
+                        canvas: '#F6F4F0',
+                        surface: '#FFFFFF',
+                    },
+                    fontFamily: {
+                        display: ['"Space Grotesk"', 'system-ui', 'sans-serif'],
+                        body: ['"Inter"', 'system-ui', 'sans-serif'],
+                        mono: ['"IBM Plex Mono"', 'monospace'],
+                    },
+                    transitionTimingFunction: {
+                        'swiss': 'cubic-bezier(0.16, 1, 0.3, 1)',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Noise Overlay */
+        .noise-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9998;
+            pointer-events: none;
+            opacity: 0.028;
+            mix-blend-mode: multiply;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.64' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* Micro-animations */
+        .chat-bubble-enter {
+            animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .pulse-soft {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+    </style>
+</head>
+
+<body class="bg-canvas text-graphite-900 font-body relative min-h-screen flex overflow-hidden">
+    <!-- Global Accoutrements -->
+    <div class="noise-overlay"></div>
+
+    <!-- Sidebar Navigation -->
+    <aside class="flex-shrink-0 h-screen w-20 bg-graphite-900 border-r border-graphite-900/10 flex flex-col items-center py-6 z-40">
+        <!-- Brand Logo -->
+        <div class="w-10 h-10 rounded-full flex items-center justify-center mb-8 shadow-lg overflow-hidden">
+            <img src="/static/img/logo.jpg" alt="Dalle Piagge Ladrilhos Logo" class="w-full h-full object-cover">
+        </div>
+        
+        <!-- Menu Icons -->
+        <div class="flex flex-col gap-6 w-full items-center">
+            <a href="/workspace/{{ workspace.id }}/dashboard/" class="text-graphite-500 hover:text-amber hover:bg-surface/5 rounded-xl p-2.5 transition-colors" title="Dashboard">
+                <iconify-icon icon="solar:home-smile-linear" width="24"></iconify-icon>
+            </a>
+            <a href="/workspace/{{ workspace.id }}/atendimento/" class="text-white bg-surface/10 rounded-xl p-2.5 transition-colors" title="Atendimento">
+                <iconify-icon icon="solar:chat-round-dots-bold" width="24"></iconify-icon>
+            </a>
+            <a href="/workspace/{{ workspace.id }}/agente/" class="text-graphite-500 hover:text-amber hover:bg-surface/5 rounded-xl p-2.5 transition-colors" title="IA Agente">
+                <iconify-icon icon="lucide:bot" width="24"></iconify-icon>
+            </a>
+            <a href="/workspace/{{ workspace.id }}/canais/" class="text-graphite-500 hover:text-amber hover:bg-surface/5 rounded-xl p-2.5 transition-colors" title="Canais">
+                <iconify-icon icon="solar:users-group-two-rounded-linear" width="24"></iconify-icon>
+            </a>
+            <a href="/workspace/{{ workspace.id }}/analise/" class="text-graphite-500 hover:text-amber hover:bg-surface/5 rounded-xl p-2.5 transition-colors" title="Análise">
+                <iconify-icon icon="solar:chart-square-linear" width="24"></iconify-icon>
+            </a>
+        </div>
+        
+        <!-- Bottom Action (Voltar) -->
+        <div class="mt-auto">
+            <a href="{% url 'workspace' %}" class="text-graphite-500 hover:text-amber hover:bg-surface/5 rounded-xl p-2.5 transition-colors block" title="Voltar para Workspaces">
+                <iconify-icon icon="solar:arrow-left-linear" width="24"></iconify-icon>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Workspace Area -->
+    <main class="flex-grow flex h-screen overflow-hidden">
+        
+        <!-- Column 2: Conversas / Tickets List (w-96) -->
+        <section class="w-96 flex-shrink-0 bg-surface border-r border-graphite-900/10 flex flex-col h-full relative z-10">
+            <!-- Header -->
+            <div class="p-6 pb-4 border-b border-graphite-900/5 flex justify-between items-center bg-surface">
+                <div>
+                    <h1 class="font-display font-semibold text-xl text-graphite-900 tracking-tight">Atendimento <span class="text-xs font-mono font-normal text-graphite-500 border border-graphite-900/10 px-2 py-0.5 rounded-full ml-1">#{{ workspace.id }}</span></h1>
+                </div>
+                <button id="btn-sync" class="text-graphite-500 hover:text-amber p-1.5 transition-all hover:rotate-180 duration-500" title="Sincronizar conversas">
+                    <iconify-icon icon="solar:restart-linear" width="20"></iconify-icon>
+                </button>
+            </div>
+
+            <!-- WhatsApp Connection Card -->
+            <div class="px-6 py-4 bg-canvas/30 border-b border-graphite-900/5">
+                <div class="flex items-center justify-between bg-surface border border-graphite-900/10 p-4 relative group">
+                    <!-- Amber left border indicator on hover -->
+                    <div class="absolute left-0 top-0 bottom-0 w-[2px] bg-amber scale-y-0 origin-top transition-transform duration-300 group-hover:scale-y-100"></div>
+                    
+                    <div class="flex items-center gap-3">
+                        <div id="status-avatar-container" class="w-10 h-10 bg-canvas rounded-full overflow-hidden flex items-center justify-center relative flex-shrink-0">
+                            <iconify-icon class="text-graphite-500" id="status-avatar-icon" icon="solar:user-rounded-linear" width="20"></iconify-icon>
+                            <img id="status-avatar-img" class="hidden w-full h-full object-cover" src="" alt="Avatar"/>
+                            <!-- Status dot indicator -->
+                            <div id="status-dot" class="w-3 h-3 bg-gray-400 border-2 border-surface rounded-full absolute bottom-0 right-0"></div>
+                        </div>
+                        <div class="min-w-0">
+                            <h3 id="status-name" class="font-display font-medium text-xs text-graphite-900 truncate">{{ canal_nome }}</h3>
+                            <p id="status-number" class="font-mono text-[9px] text-graphite-500 truncate">Desconectado</p>
+                        </div>
+                    </div>
+                    
+                    <div class="text-right flex flex-col items-end gap-1.5 flex-shrink-0">
+                        <span id="status-badge" class="font-mono text-[8px] font-semibold uppercase tracking-wider text-graphite-500 bg-canvas border border-graphite-900/10 px-2 py-0.5">DESCONECTADO</span>
+                        <div class="flex items-center gap-2">
+                            <button id="btn-deletar" class="font-mono text-[9px] font-bold uppercase tracking-wider text-graphite-500 hover:text-[#F43F5E] transition-colors underline cursor-pointer" title="Deletar Instância Permanentemente">DELETAR</button>
+                            <button id="btn-conectar" class="font-mono text-[9px] font-bold uppercase tracking-wider text-[#10B981] hover:text-[#059669] transition-colors underline cursor-pointer">CONECTAR</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search and Filter Bar -->
+            <div class="p-4 border-b border-graphite-900/5 bg-surface flex gap-2">
+                <div class="relative flex-grow">
+                    <iconify-icon class="absolute left-3.5 top-1/2 -translate-y-1/2 text-graphite-500" icon="solar:magnifer-linear" width="16"></iconify-icon>
+                    <input id="search-input" type="text" class="w-full bg-canvas border border-graphite-900/10 pl-10 pr-4 py-2.5 font-mono text-[11px] placeholder:text-graphite-500/50 focus:outline-none focus:border-amber focus:ring-1 focus:ring-amber transition-all" placeholder="Pesquisar conversa..."/>
+                </div>
+                <button class="bg-canvas border border-graphite-900/10 px-3 flex items-center justify-center hover:bg-graphite-900 hover:text-white transition-colors" title="Filtros avançados">
+                    <iconify-icon icon="solar:tuning-linear" width="16"></iconify-icon>
+                </button>
+            </div>
+
+            <!-- Scrollable Conversations List -->
+            <div class="flex-grow overflow-y-auto hide-scrollbar" id="conversations-list">
+                <!-- Seeding dynamically with JS -->
+            </div>
+        </section>
+
+        <!-- Column 3: Chat Content Panel (flex-grow) -->
+        <section class="flex-grow flex flex-col h-full bg-[#FAF9F6] relative" id="chat-panel">
+            
+            <!-- Empty Chat Welcome State -->
+            <div class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center z-20 transition-all duration-300" id="empty-state">
+                <div class="w-20 h-20 bg-surface border border-graphite-900/10 flex items-center justify-center text-amber mb-6 shadow-md">
+                    <iconify-icon icon="solar:chat-round-dots-linear" width="36"></iconify-icon>
+                </div>
+                <h2 class="font-display font-medium text-lg text-graphite-900 mb-2">Nenhuma conversa selecionada</h2>
+                <p class="font-body text-xs text-graphite-500 max-w-[35ch] leading-relaxed">Selecione uma conversa na lista ao lado para visualizar e enviar mensagens.</p>
+            </div>
+
+            <!-- Active Chat State (Hidden by default, shown when chat selected) -->
+            <div class="hidden flex flex-col h-full z-10" id="active-chat-state">
+                <!-- Active Chat Header -->
+                <header class="p-6 border-b border-graphite-900/10 bg-surface flex justify-between items-center flex-shrink-0">
+                    <div class="flex items-center gap-4">
+                        <div id="active-chat-avatar" class="w-11 h-11 bg-graphite-900 text-canvas font-display text-sm font-semibold flex items-center justify-center relative flex-shrink-0">
+                            <!-- Initials dynamically set -->
+                        </div>
+                        <div>
+                            <h2 id="active-chat-name" class="font-display font-semibold text-base text-graphite-900 leading-tight">Nome do Contato</h2>
+                            <div class="flex items-center gap-1.5 mt-0.5">
+                                <div class="w-1.5 h-1.5 bg-[#10B981] rounded-full animate-pulse"></div>
+                                <span class="font-mono text-[9px] text-[#10B981] uppercase tracking-wider">Online</span>
+                                <span id="active-chat-number" class="font-mono text-[9px] text-graphite-500 border-l border-graphite-900/10 pl-1.5 ml-1.5">WhatsApp</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Header Actions -->
+                    <div class="flex items-center gap-3">
+                        <button class="text-graphite-500 hover:text-amber p-1.5 transition-colors" title="Ver detalhes do lead">
+                            <iconify-icon icon="solar:info-circle-linear" width="20"></iconify-icon>
+                        </button>
+                        <button class="text-graphite-500 hover:text-amber p-1.5 transition-colors" title="Mais opções">
+                            <iconify-icon icon="solar:menu-dots-square-linear" width="20"></iconify-icon>
+                        </button>
+                    </div>
+                </header>
+
+                <!-- Active Chat Messages History (Scrollable) -->
+                <div class="flex-grow overflow-y-auto p-6 space-y-4 bg-canvas/30 flex flex-col hide-scrollbar" id="messages-container">
+                    <!-- Messages will load dynamically here -->
+                </div>
+
+                <!-- Typings simulation indicator (Hidden by default) -->
+                <div id="typing-indicator" class="hidden px-6 py-2 text-xs text-graphite-500 font-mono italic bg-canvas/10 flex items-center gap-2">
+                    <div class="flex gap-1 items-center">
+                        <span class="w-1 h-1 bg-graphite-500 rounded-full animate-bounce"></span>
+                        <span class="w-1 h-1 bg-graphite-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></span>
+                        <span class="w-1 h-1 bg-graphite-500 rounded-full animate-bounce" style="animation-delay: 0.4s"></span>
+                    </div>
+                    <span id="typing-text">Digitando...</span>
+                </div>
+
+                <!-- Active Chat Input Footer -->
+                <footer class="p-6 border-t border-graphite-900/10 bg-surface flex-shrink-0">
+                    <form id="message-form" class="flex gap-3 items-center">
+                        <!-- Extra action attachments -->
+                        <div class="flex items-center gap-2">
+                            <button type="button" class="w-10 h-10 bg-canvas border border-graphite-900/10 flex items-center justify-center text-graphite-500 hover:bg-graphite-900 hover:text-white transition-all" title="Anexar arquivo">
+                                <iconify-icon icon="solar:paperclip-linear" width="18"></iconify-icon>
+                            </button>
+                            <button type="button" class="w-10 h-10 bg-canvas border border-graphite-900/10 flex items-center justify-center text-graphite-500 hover:bg-graphite-900 hover:text-white transition-all" title="Inserir Emoji">
+                                <iconify-icon icon="solar:emoji-funny-linear" width="18"></iconify-icon>
+                            </button>
+                        </div>
+                        
+                        <!-- Input Message -->
+                        <input id="message-input" type="text" autocomplete="off" class="flex-grow bg-canvas border border-graphite-900/10 px-4 py-3 font-body text-xs text-graphite-900 placeholder:text-graphite-500/50 focus:outline-none focus:border-amber focus:ring-1 focus:ring-amber transition-all" placeholder="Digite uma mensagem..."/>
+                        
+                        <!-- Send Button -->
+                        <button type="submit" class="bg-gradient-to-b from-graphite-800 to-graphite-900 hover:shadow-[0_4px_14px_rgba(14,15,17,0.2)] text-white px-5 py-3 font-mono text-[10px] font-semibold uppercase tracking-wider flex items-center gap-2 transition-all">
+                            <span>Enviar</span>
+                            <iconify-icon icon="solar:send-bold" width="14"></iconify-icon>
+                        </button>
+                    </form>
+                </footer>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal: Conectar WhatsApp (Evolution API QR Code) -->
+    <div id="qrcode-modal" class="fixed inset-0 bg-graphite-900/60 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-all duration-300">
+        <div class="bg-surface border border-graphite-900/10 max-w-sm w-full p-8 relative scale-95 transition-all duration-300">
+            <!-- Modal Accent line -->
+            <div class="absolute top-0 left-0 w-full h-[2px] bg-amber"></div>
+            
+            <!-- Close Modal -->
+            <button id="btn-close-qrcode" class="absolute top-4 right-4 text-graphite-500 hover:text-[#F43F5E] transition-colors p-1 flex items-center justify-center">
+                <iconify-icon icon="solar:close-circle-linear" width="22"></iconify-icon>
+            </button>
+
+            <div class="text-center mb-6">
+                <h3 class="font-display font-semibold text-lg text-graphite-900 mb-1">Conectar WhatsApp</h3>
+                <p class="font-body text-xs text-graphite-500">Escaneie o QR Code abaixo com o WhatsApp Web do seu aparelho.</p>
+            </div>
+
+            <!-- QR Code Area -->
+            <div class="bg-[#F8FAFC] border border-graphite-900/5 p-6 flex flex-col items-center justify-center min-h-[260px] relative mb-6">
+                
+                <!-- Loading State -->
+                <div id="qrcode-loading" class="flex flex-col items-center justify-center text-center gap-3">
+                    <div class="w-12 h-12 border-2 border-amber border-t-transparent animate-spin rounded-full"></div>
+                    <span class="font-mono text-[10px] text-graphite-500 uppercase tracking-widest pulse-soft">Gerando Conexão...</span>
+                </div>
+                
+                <!-- QR Code Container -->
+                <div id="qrcode-container" class="hidden flex flex-col items-center justify-center">
+                    <img id="qrcode-img" class="w-48 h-48 bg-white border border-graphite-900/10 p-2 shadow-sm" src="" alt="WhatsApp QR Code"/>
+                    <span id="pairing-code-box" class="hidden mt-4 font-mono text-[10px] bg-amber/10 border border-amber/20 text-amberDark px-3 py-1.5 tracking-wider font-semibold uppercase"></span>
+                </div>
+
+                <!-- Error / Simulation Fallback State -->
+                <div id="qrcode-error" class="hidden flex flex-col items-center justify-center text-center gap-3">
+                    <iconify-icon class="text-amber" icon="solar:danger-triangle-linear" width="40"></iconify-icon>
+                    <span class="font-display font-semibold text-xs text-graphite-900">Evolution API Indisponível ou Ocupada</span>
+                    <p class="font-body text-[10px] text-graphite-500 max-w-[24ch]">Verifique se a Evolution API está rodando, ou se a instância já não está conectada. Atualize a página.</p>
+                </div>
+            </div>
+
+            <!-- Steps Instructions -->
+            <div class="space-y-3 font-body text-xs text-graphite-500">
+                <div class="flex gap-3">
+                    <span class="font-mono font-bold text-amber">01</span>
+                    <p>No celular, abra o <strong>WhatsApp</strong>.</p>
+                </div>
+                <div class="flex gap-3">
+                    <span class="font-mono font-bold text-amber">02</span>
+                    <p>Toque em <strong>Configurações</strong> ou <strong>Aparelhos Conectados</strong>.</p>
+                </div>
+                <div class="flex gap-3">
+                    <span class="font-mono font-bold text-amber">03</span>
+                    <p>Selecione <strong>Conectar um Aparelho</strong> e aponte para a tela.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Area containing Dynamic Functionality -->
+    <script>
+        // State variables
+        let chats = [];
+        let activeChat = null;
+        let isConnected = false;
+
+        // Dom Elements
+        const conversationsList = document.getElementById("conversations-list");
+        const emptyState = document.getElementById("empty-state");
+        const activeChatState = document.getElementById("active-chat-state");
+        
+        const activeChatAvatar = document.getElementById("active-chat-avatar");
+        const activeChatName = document.getElementById("active-chat-name");
+        const activeChatNumber = document.getElementById("active-chat-number");
+        const messagesContainer = document.getElementById("messages-container");
+        
+        const messageForm = document.getElementById("message-form");
+        const messageInput = document.getElementById("message-input");
+        const searchInput = document.getElementById("search-input");
+        const btnSync = document.getElementById("btn-sync");
+
+        // Connection Card elements
+        const statusDot = document.getElementById("status-dot");
+        const statusName = document.getElementById("status-name");
+        const statusNumber = document.getElementById("status-number");
+        const statusBadge = document.getElementById("status-badge");
+        const btnConectar = document.getElementById("btn-conectar");
+        const btnDeletar = document.getElementById("btn-deletar");
+
+        // QR Code Modal elements
+        const qrcodeModal = document.getElementById("qrcode-modal");
+        const btnCloseQrcode = document.getElementById("btn-close-qrcode");
+        const qrcodeLoading = document.getElementById("qrcode-loading");
+        const qrcodeContainer = document.getElementById("qrcode-container");
+        const qrcodeError = document.getElementById("qrcode-error");
+        const qrcodeImg = document.getElementById("qrcode-img");
+        const pairingCodeBox = document.getElementById("pairing-code-box");
+
+        // Helper: Formata a data de forma inteligente (Hoje: HH:MM, Ontem: Ontem, Outro: DD/MM/YYYY)
+        function formatChatTime(timestamp) {
+            if (!timestamp) return "";
+            const date = new Date(timestamp * 1000);
+            if (isNaN(date)) return "";
+            
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+            const compareDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+            
+            if (compareDate.getTime() === today.getTime()) {
+                return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+            } else if (compareDate.getTime() === yesterday.getTime()) {
+                return "Ontem";
+            } else {
+                return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+            }
+        }
+
+        function formatPhoneNumber(jid) {
+            if (!jid) return "Sem Número";
+            return "+" + jid.split('@')[0];
+        }
+
+        // Fetch Real Chats from Backend
+        let allChatsBackup = [];
+        function fetchRealChats() {
+            fetch(`/workspace/{{ workspace.id }}/atendimento/conversas/`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        chats = data.conversas;
+                        allChatsBackup = [...chats];
+                        renderChats();
+                        
+                        // Recarrega chat ativo se houver
+                        if (activeChat) {
+                            const updatedChat = chats.find(c => c.id === activeChat.id);
+                            if (updatedChat) {
+                                selectChat(updatedChat);
+                            } else {
+                                activeChat = null;
+                                emptyState.classList.remove("hidden");
+                                activeChatState.classList.add("hidden");
+                            }
+                        }
+                    }
+                })
+                .catch(err => console.error("Erro ao carregar conversas:", err));
+        }
+
+        // Render Conversation List
+        function renderChats() {
+            conversationsList.innerHTML = "";
+            
+            if (chats.length === 0) {
+                conversationsList.innerHTML = `
+                    <div class="flex flex-col items-center justify-center p-8 text-center h-48 select-none">
+                        <iconify-icon class="text-graphite-300 mb-3" icon="solar:chat-round-dots-linear" width="32"></iconify-icon>
+                        <span class="font-display font-medium text-xs text-graphite-900">Nenhuma conversa encontrada</span>
+                        <span class="font-body text-[10px] text-graphite-500 mt-1">Conecte o WhatsApp ou atualize a lista.</span>
+                    </div>
+                `;
+                return;
+            }
+
+            chats.forEach(chat => {
+                const isActive = activeChat && activeChat.id === chat.id;
+                const activeClasses = isActive 
+                    ? "bg-canvas border-l-2 border-amber" 
+                    : "hover:bg-canvas/50 border-l-2 border-transparent";
+                
+                const unreadBadge = chat.unread > 0 
+                    ? `<span class="bg-amber text-graphite-900 font-mono text-[9px] font-bold w-4.5 h-4.5 rounded-full flex items-center justify-center">${chat.unread}</span>` 
+                    : "";
+
+                const avatarHTML = chat.profilePicUrl 
+                    ? `<img src="${chat.profilePicUrl}" alt="${chat.name}" class="w-10 h-10 object-cover" />`
+                    : `<div class="w-10 h-10 bg-graphite-900 text-canvas font-display text-xs font-semibold flex items-center justify-center flex-shrink-0">${chat.initials}</div>`;
+
+                const chatItem = document.createElement("div");
+                chatItem.className = `p-4 border-b border-graphite-900/5 cursor-pointer transition-all flex justify-between items-start ${activeClasses}`;
+                chatItem.innerHTML = `
+                    <div class="flex gap-3 min-w-0">
+                        <div class="flex-shrink-0 overflow-hidden relative">
+                            ${avatarHTML}
+                            <div class="w-2.5 h-2.5 bg-[#10B981] border border-canvas rounded-full absolute bottom-0 right-0"></div>
+                        </div>
+                        <div class="min-w-0">
+                            <h4 class="font-display font-semibold text-xs text-graphite-900 truncate">${chat.name}</h4>
+                            <p class="font-body text-[10px] text-graphite-500 truncate mt-0.5">${chat.lastMessage}</p>
+                        </div>
+                    </div>
+                    <div class="text-right flex flex-col items-end gap-1.5 flex-shrink-0 pl-2">
+                        <span class="font-mono text-[9px] text-graphite-500">${chat.time}</span>
+                        ${unreadBadge}
+                    </div>
+                `;
+                
+                chatItem.addEventListener("click", () => selectChat(chat));
+                conversationsList.appendChild(chatItem);
+            });
+        }
+
+        // Select Chat
+        function selectChat(chat) {
+            activeChat = chat;
+            chat.unread = 0; // Clear unread on select
+            
+            // Toggle states
+            emptyState.classList.add("hidden");
+            activeChatState.classList.remove("hidden");
+
+            // Update Header
+            if (chat.profilePicUrl) {
+                activeChatAvatar.innerHTML = `<img src="${chat.profilePicUrl}" alt="${chat.name}" class="w-full h-full object-cover" />`;
+            } else {
+                activeChatAvatar.innerHTML = chat.initials;
+            }
+            activeChatName.innerText = chat.name;
+            activeChatNumber.innerText = chat.number;
+
+            // Fetch Messages
+            messagesContainer.innerHTML = `
+                <div class="flex-grow flex items-center justify-center text-xs text-graphite-500 italic p-4">
+                    <div class="w-6 h-6 border-2 border-amber border-t-transparent animate-spin rounded-full"></div>
+                </div>
+            `;
+            
+            fetch(`/workspace/{{ workspace.id }}/atendimento/conversas/${chat.id}/`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        activeChat.messages = data.messages;
+                        renderMessages();
+                        renderChats(); // Atualiza a lista lateral se necessário
+                    } else {
+                        messagesContainer.innerHTML = `<div class="text-xs text-red-500 italic p-4">Erro ao carregar histórico: ${data.message}</div>`;
+                    }
+                })
+                .catch(err => {
+                    console.error("Erro ao carregar histórico:", err);
+                    messagesContainer.innerHTML = `<div class="text-xs text-red-500 italic p-4">Erro de conexão ao carregar histórico.</div>`;
+                });
+        }
+
+        // Render Messages in active window
+        function renderMessages() {
+            messagesContainer.innerHTML = "";
+            if (!activeChat) return;
+            
+            if (!activeChat.messages || activeChat.messages.length === 0) {
+                 messagesContainer.innerHTML = `
+                    <div class="flex-grow flex items-center justify-center text-xs text-graphite-500 italic p-4">
+                        Nenhuma mensagem armazenada em cache para exibir.
+                    </div>
+                 `;
+                 return;
+            }
+
+            activeChat.messages.forEach(msg => {
+                const isUser = msg.sender === "user";
+                const wrapperClass = isUser ? "justify-end" : "justify-start";
+                const bubbleClass = isUser 
+                    ? "bg-graphite-900 text-canvas border border-graphite-800" 
+                    : "bg-surface text-graphite-900 border border-graphite-900/10 shadow-[0_2px_8px_rgba(14,15,17,0.01)]";
+
+                const msgBubble = document.createElement("div");
+                msgBubble.className = `flex ${wrapperClass} chat-bubble-enter`;
+                msgBubble.innerHTML = `
+                    <div class="max-w-[70%] p-3.5 rounded-none flex flex-col gap-1.5 ${bubbleClass}">
+                        <p class="font-body text-[11px] leading-relaxed whitespace-pre-wrap">${msg.text}</p>
+                        <span class="font-mono text-[8px] self-end opacity-60">${msg.time}</span>
+                    </div>
+                `;
+                messagesContainer.appendChild(msgBubble);
+            });
+
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Send Message
+        messageForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const text = messageInput.value.trim();
+            if (!text || !activeChat) return;
+
+            const now = new Date();
+            const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+            // Add msg locally
+            if(!activeChat.messages) activeChat.messages = [];
+            const newMsg = { sender: "user", text: text, time: timeStr };
+            activeChat.messages.push(newMsg);
+            activeChat.lastMessage = text;
+            activeChat.time = timeStr;
+
+            messageInput.value = "";
+            renderMessages();
+            renderChats();
+            
+            // Aqui precisaria implementar uma chamada API para enviar a msg real para a Evolution API.
+        });
+
+        // Filter / Search Conversations
+        searchInput.addEventListener("input", (e) => {
+            const term = e.target.value.toLowerCase().trim();
+            if (!term) {
+                chats = [...allChatsBackup];
+            } else {
+                chats = allChatsBackup.filter(chat => 
+                    chat.name.toLowerCase().includes(term) || 
+                    chat.number.toLowerCase().includes(term)
+                );
+            }
+            renderChats();
+        });
+
+        // Sync Refresh Spin Button
+        btnSync.addEventListener("click", () => {
+            btnSync.classList.add("pointer-events-none");
+            
+            fetchRealChats();
+            
+            setTimeout(() => {
+                btnSync.classList.remove("pointer-events-none");
+            }, 1000);
+        });
+
+        let statusInterval = null;
+
+        // Delete Instance Action
+        btnDeletar.addEventListener("click", () => {
+            if (confirm("Tem certeza que deseja deletar permanentemente esta instância do WhatsApp? Você precisará ler o QR Code novamente para conectar.")) {
+                const originalText = btnDeletar.innerText;
+                btnDeletar.innerText = "DELETANDO...";
+                btnDeletar.classList.add("pointer-events-none", "opacity-50");
+                
+                fetch(`/workspace/{{ workspace.id }}/atendimento/deletar/?instance={{ instance_name }}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken') || '',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    btnDeletar.classList.remove("pointer-events-none", "opacity-50");
+                    btnDeletar.innerText = originalText;
+                    if (data.success) {
+                        isConnected = false;
+                        
+                        // Reset card
+                        setConnectionUIDisconnected("{{ canal_nome }}");
+                        
+                        chats = [];
+                        allChatsBackup = [];
+                        renderChats();
+                        alert("Instância deletada com sucesso!");
+                    } else {
+                        alert("Erro ao deletar: " + (data.message || "Erro desconhecido"));
+                    }
+                })
+                .catch(err => {
+                    console.error("Erro ao deletar:", err);
+                    btnDeletar.classList.remove("pointer-events-none", "opacity-50");
+                    btnDeletar.innerText = originalText;
+                    alert("Erro ao deletar a instância.");
+                });
+            }
+        });
+
+        // Combined Connect/Disconnect Action
+        btnConectar.addEventListener("click", (e) => {
+            if (isConnected) {
+                // Handle Disconnect Action
+                e.stopPropagation();
+                
+                // Show a loading state on the button
+                const originalText = btnConectar.innerText;
+                btnConectar.innerText = "DESCONECTANDO...";
+                btnConectar.classList.add("pointer-events-none", "opacity-50");
+                
+                // Call backend to disconnect the instance
+                fetch(`/workspace/{{ workspace.id }}/atendimento/desconectar/?instance={{ instance_name }}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken') || '', // Function to get csrf token needed
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    btnConectar.classList.remove("pointer-events-none", "opacity-50");
+                    if (data.success) {
+                        isConnected = false;
+                        
+                        // Reset card
+                        setConnectionUIDisconnected("{{ canal_nome }}");
+                        
+                        chats = [];
+                        allChatsBackup = [];
+                        renderChats();
+                    } else {
+                        btnConectar.innerText = originalText;
+                        alert("Erro ao desconectar: " + (data.message || "Erro desconhecido"));
+                    }
+                })
+                .catch(err => {
+                    console.error("Erro ao desconectar:", err);
+                    btnConectar.classList.remove("pointer-events-none", "opacity-50");
+                    btnConectar.innerText = originalText;
+                    alert("Erro ao desconectar da instância.");
+                });
+            } else {
+                // Open Modal UI
+                qrcodeModal.classList.remove("pointer-events-none");
+                qrcodeModal.classList.add("opacity-100");
+                
+                // Show loading initially
+                qrcodeLoading.classList.remove("hidden");
+                qrcodeContainer.classList.add("hidden");
+                qrcodeError.classList.add("hidden");
+
+                // Query Django endpoint to fetch real Evolution API QR Code!
+                fetchQrcode();
+            }
+        });
+
+        // Helper to get CSRF token from cookies
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Close Modal
+        function closeQrcodeModal() {
+            qrcodeModal.classList.add("pointer-events-none");
+            qrcodeModal.classList.remove("opacity-100");
+            if (statusInterval) clearInterval(statusInterval);
+        }
+        btnCloseQrcode.addEventListener("click", closeQrcodeModal);
+
+        // Define UI Disconnected connection state
+        function setConnectionUIDisconnected(instanceName) {
+            isConnected = false;
+            statusDot.className = "w-3 h-3 bg-gray-400 border-2 border-surface rounded-full absolute bottom-0 right-0";
+            statusName.innerText = instanceName || "{{ canal_nome }}";
+            statusNumber.innerText = "Desconectado";
+            
+            // Reset Avatar
+            const statusAvatarIcon = document.getElementById("status-avatar-icon");
+            const statusAvatarImg = document.getElementById("status-avatar-img");
+            if (statusAvatarIcon && statusAvatarImg) {
+                statusAvatarIcon.classList.remove("hidden");
+                statusAvatarImg.classList.add("hidden");
+                statusAvatarImg.src = "";
+            }
+            
+            statusBadge.innerText = "DESCONECTADO";
+            statusBadge.className = "font-mono text-[8px] font-semibold uppercase tracking-wider text-graphite-500 bg-canvas border border-graphite-900/10 px-2 py-0.5";
+            
+            btnConectar.innerText = "CONECTAR";
+            btnConectar.className = "font-mono text-[9px] font-bold uppercase tracking-wider text-[#10B981] hover:text-[#059669] transition-colors underline cursor-pointer";
+        }
+
+        // Define UI Success connection state
+        function setConnectionUISuccess(number, name, profilePicUrl) {
+            isConnected = true;
+            statusDot.className = "w-3 h-3 bg-[#10B981] border-2 border-surface rounded-full absolute bottom-0 right-0";
+            statusName.innerText = name || "{{ canal_nome }}";
+            statusNumber.innerText = number || "Conectado";
+            
+            statusBadge.innerText = "CONECTADO";
+            statusBadge.className = "font-mono text-[8px] font-semibold uppercase tracking-wider text-white bg-[#10B981] border border-[#10B981] px-2 py-0.5";
+            
+            btnConectar.innerText = "DESCONECTAR";
+            btnConectar.className = "font-mono text-[9px] font-bold uppercase tracking-wider text-[#F43F5E] hover:text-[#E11D48] transition-colors underline cursor-pointer";
+            
+            // Define o avatar real se houver
+            const statusAvatarIcon = document.getElementById("status-avatar-icon");
+            const statusAvatarImg = document.getElementById("status-avatar-img");
+            if (statusAvatarIcon && statusAvatarImg) {
+                if (profilePicUrl) {
+                    statusAvatarIcon.classList.add("hidden");
+                    statusAvatarImg.src = profilePicUrl;
+                    statusAvatarImg.classList.remove("hidden");
+                } else {
+                    statusAvatarIcon.classList.remove("hidden");
+                    statusAvatarImg.classList.add("hidden");
+                    statusAvatarImg.src = "";
+                }
+            }
+            
+            fetchRealChats();
+        }
+
+        // Fetch QR Code from Backend View
+        function fetchQrcode() {
+            fetch(`/workspace/{{ workspace.id }}/atendimento/qrcode/?instance={{ instance_name }}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.base64) {
+                        // Display the real base64 image!
+                        let base64str = data.base64;
+                        if (!base64str.startsWith('data:image')) {
+                            base64str = 'data:image/png;base64,' + base64str;
+                        }
+                        qrcodeImg.src = base64str;
+                        qrcodeLoading.classList.add("hidden");
+                        qrcodeContainer.classList.remove("hidden");
+                        
+                        if (data.pairing_code) {
+                            pairingCodeBox.innerText = `Código de Pareamento: ${data.pairing_code}`;
+                            pairingCodeBox.classList.remove("hidden");
+                        } else {
+                            pairingCodeBox.classList.add("hidden");
+                        }
+
+                        // Poll status
+                        if (statusInterval) clearInterval(statusInterval);
+                        statusInterval = setInterval(checkConnectionStatus, 3000);
+
+                    } else {
+                        // Failed to fetch real QR code from active Evolution API
+                        showSimulationState();
+                    }
+                })
+                .catch(err => {
+                    console.error("Erro ao buscar QR Code:", err);
+                    showSimulationState();
+                });
+        }
+
+        // Check Connection Status from backend
+        function checkConnectionStatus() {
+            const defaultInstanceName = "{{ instance_name }}";
+            fetch(`/workspace/{{ workspace.id }}/atendimento/status/?instance={{ instance_name }}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.state === "open") {
+                        if (statusInterval) clearInterval(statusInterval);
+                        closeQrcodeModal();
+                        
+                        const profileName = (data.instance && data.instance.profileName) ? data.instance.profileName : "{{ canal_nome }}";
+                        const number = (data.instance && data.instance.ownerJid) ? formatPhoneNumber(data.instance.ownerJid) : "";
+                        const profilePicUrl = (data.instance && data.instance.profilePicUrl) ? data.instance.profilePicUrl : "";
+                        
+                        setConnectionUISuccess(number, profileName, profilePicUrl);
+                    } else if (data.success && data.state === "disconnected") {
+                        if (statusInterval) clearInterval(statusInterval);
+                        setConnectionUIDisconnected("{{ canal_nome }}");
+                    }
+                })
+                .catch(err => {
+                    console.error("Erro ao verificar status da conexão:", err);
+                });
+        }
+
+        // Initialize: check if already connected
+        function initConnectionStatus() {
+            fetch(`/workspace/{{ workspace.id }}/atendimento/status/?instance={{ instance_name }}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.state === "open") {
+                        const profileName = (data.instance && data.instance.profileName) ? data.instance.profileName : "{{ canal_nome }}";
+                        const number = (data.instance && data.instance.ownerJid) ? formatPhoneNumber(data.instance.ownerJid) : "";
+                        const profilePicUrl = (data.instance && data.instance.profilePicUrl) ? data.instance.profilePicUrl : "";
+                        
+                        setConnectionUISuccess(number, profileName, profilePicUrl);
+                    } else {
+                        setConnectionUIDisconnected("{{ canal_nome }}");
+                        fetchRealChats(); // fetch empty or cached
+                    }
+                })
+                .catch(err => {
+                    console.error("Erro no init da conexão:", err);
+                    setConnectionUIDisconnected(defaultInstanceName);
+                    fetchRealChats();
+                });
+        }
+
+        // Show Simulation State (Fallback)
+        function showSimulationState() {
+            qrcodeLoading.classList.add("hidden");
+            qrcodeError.classList.remove("hidden");
+            if (statusInterval) clearInterval(statusInterval);
+        }
+
+        // Wire the top right Refresh Button safely
+        const iconRefresh = document.querySelector('iconify-icon[icon="solar:restart-linear"]');
+        const btnRefresh = iconRefresh ? iconRefresh.parentElement : null;
+        if (btnRefresh) {
+            btnRefresh.addEventListener("click", () => {
+                if (isConnected) {
+                    btnRefresh.classList.add("animate-spin");
+                    fetchRealChats();
+                    setTimeout(() => btnRefresh.classList.remove("animate-spin"), 1000);
+                }
+            });
+        }
+
+        // Initialize lists
+        initConnectionStatus();
+    </script>
+</body>
+</html>

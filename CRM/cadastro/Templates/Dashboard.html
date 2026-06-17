@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html class="scroll-smooth antialiased" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Dalle Piagge Ladrilhos | Dashboard Kanban</title>
+    
+    <!-- Fonts from Google Fonts CDN -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+    
+    <!-- Tailwind CSS from CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Iconify from CDN -->
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        graphite: {
+                            900: '#0E0F11',
+                            800: '#1A1C20',
+                            700: '#2A2D35',
+                            500: '#5C5F66',
+                        },
+                        amber: '#E8A020',
+                        amberDark: '#D18D1A',
+                        canvas: '#F6F4F0',
+                        surface: '#FFFFFF',
+                    },
+                    fontFamily: {
+                        display: ['"Space Grotesk"', 'system-ui', 'sans-serif'],
+                        body: ['"Inter"', 'system-ui', 'sans-serif'],
+                        mono: ['"IBM Plex Mono"', 'monospace'],
+                    },
+                    fontSize: {
+                        'h1': 'clamp(2.75rem, 5.5vw, 5.25rem)',
+                        'h2': 'clamp(2rem, 3.5vw, 3.25rem)',
+                        'h3': 'clamp(1.2rem, 1.8vw, 1.6rem)',
+                        'body': 'clamp(0.875rem, 1vw, 1rem)',
+                    },
+                    spacing: {
+                        'section': 'clamp(5.5rem, 9vw, 11rem)',
+                        'container': 'clamp(1.5rem, 5vw, 4rem)',
+                        'card': 'clamp(1.75rem, 2.5vw, 2.5rem)',
+                    },
+                    transitionTimingFunction: {
+                        'swiss': 'cubic-bezier(0.16, 1, 0.3, 1)',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        /* Noise Overlay */
+        .noise-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9998;
+            pointer-events: none;
+            opacity: 0.028;
+            mix-blend-mode: multiply;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.64' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+        .dragging {
+            opacity: 0.5;
+            transform: scale(0.98);
+        }
+        .dropzone-active {
+            background-color: rgba(0,0,0,0.02);
+            border: 2px dashed #E8A020;
+        }
+    </style>
+</head>
+
+<body class="bg-canvas text-graphite-900 font-body text-body selection:bg-amber selection:text-white relative min-h-screen flex">
+    <!-- Global Accoutrements -->
+    <div class="noise-overlay"></div>
+
+    <!-- Sidebar Navigation -->
+    <aside class="fixed top-0 left-0 h-screen w-20 bg-graphite-900 border-r border-graphite-900/10 flex flex-col items-center py-6 z-50">
+        <!-- Brand Logo -->
+        <div class="w-10 h-10 rounded-full flex items-center justify-center mb-8 shadow-lg overflow-hidden">
+            <img src="/static/img/logo.jpg" alt="Dalle Piagge Ladrilhos Logo" class="w-full h-full object-cover">
+        </div>
+        
+        <!-- Menu Icons -->
+        <div class="flex flex-col gap-6 w-full items-center">
+            <a href="/workspace/{{ workspace.id }}/dashboard/" class="text-white bg-surface/10 rounded-xl p-2.5 transition-colors" title="Dashboard">
+                <iconify-icon icon="solar:home-smile-bold" width="24"></iconify-icon>
+            </a>
+            <a href="/workspace/{{ workspace.id }}/atendimento/" class="text-graphite-500 hover:text-amber hover:bg-surface/5 rounded-xl p-2.5 transition-colors" title="Conversas">
+                <iconify-icon icon="solar:chat-round-dots-linear" width="24"></iconify-icon>
+            </a>
+            <a href="/workspace/{{ workspace.id }}/agente/" class="text-graphite-500 hover:text-amber hover:bg-surface/5 rounded-xl p-2.5 transition-colors" title="IA Agente">
+                <iconify-icon icon="lucide:bot" width="24"></iconify-icon>
+            </a>
+            <a href="/workspace/{{ workspace.id }}/canais/" class="text-graphite-500 hover:text-amber hover:bg-surface/5 rounded-xl p-2.5 transition-colors" title="Canais">
+                <iconify-icon icon="solar:users-group-two-rounded-linear" width="24"></iconify-icon>
+            </a>
+            <a href="/workspace/{{ workspace.id }}/analise/" class="text-graphite-500 hover:text-amber hover:bg-surface/5 rounded-xl p-2.5 transition-colors" title="Análise">
+                <iconify-icon icon="solar:chart-square-linear" width="24"></iconify-icon>
+            </a>
+        </div>
+        
+        <!-- Bottom Action -->
+        <div class="mt-auto">
+            <a href="{% url 'workspace' %}" class="text-graphite-500 hover:text-amber hover:bg-surface/5 rounded-xl p-2.5 transition-colors block" title="Voltar para Workspaces">
+                <iconify-icon icon="solar:arrow-left-linear" width="24"></iconify-icon>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="ml-20 flex-grow min-h-screen pt-8 px-container pb-8 flex flex-col">
+        <!-- Header -->
+        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            <div>
+                <h1 class="font-display font-semibold text-2xl text-graphite-900 mb-1">Funil padrao</h1>
+                <p class="font-body text-graphite-500 text-sm">Gerencie os atendimentos arrastando entre as etapas</p>
+            </div>
+            
+            <button id="btn-open-modal" class="bg-[#10B981] hover:bg-[#059669] text-white font-mono text-[11px] font-semibold uppercase tracking-wider py-2.5 px-5 rounded-full flex items-center gap-2 transition-all shadow-[0_4px_14px_rgba(16,185,129,0.3)] hover:shadow-[0_6px_20px_rgba(16,185,129,0.4)]">
+                <iconify-icon icon="solar:add-circle-linear" width="16"></iconify-icon>
+                <span>Nova Etapa</span>
+            </button>
+        </header>
+
+        <!-- Kanban Board Area -->
+        <div class="flex gap-6 overflow-x-auto pb-4 hide-scrollbar flex-grow items-start" id="kanban-board">
+            {% for etapa in etapas %}
+            <div class="w-[340px] flex-shrink-0 bg-[#F8FAFC] border border-graphite-900/5 rounded-2xl p-4 flex flex-col h-full max-h-[calc(100vh-160px)] column-container transition-all duration-300"
+                 id="{% if forloop.first %}col-fixed{% else %}col-{{ etapa.id }}{% endif %}"
+                 {% if not forloop.first %}
+                 draggable="true" 
+                 ondragstart="dragCol(event)"
+                 {% endif %}
+                 ondrop="dropCol(event)" 
+                 ondragover="allowDropCol(event)" 
+                 ondragenter="dragEnterCol(event)" 
+                 ondragleave="dragLeaveCol(event)">
+                <!-- Column Header -->
+                <div class="flex justify-between items-center mb-5 px-1 {% if not forloop.first %}cursor-grab active:cursor-grabbing{% endif %}">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-3 h-3 rounded-full bg-[#60A5FA] shadow-[0_0_8px_rgba(96,165,250,0.5)]"></div>
+                        <h3 class="font-display font-semibold text-graphite-900 text-[15px]">{{ etapa.nome }} {% if forloop.first %}<span class="text-[10px] bg-black/5 text-graphite-500 px-2 py-0.5 rounded-full ml-1 font-normal tracking-wide">FIXO</span>{% endif %}</h3>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="bg-[#EFF6FF] text-[#3B82F6] text-xs font-mono font-medium px-2.5 py-1 rounded-lg">0</span>
+                        <form action="/workspace/{{ workspace.id }}/etapa/{{ etapa.id }}/deletar/" method="POST" class="inline pointer-events-auto" onsubmit="return confirm('Tem certeza que deseja excluir esta etapa?');">
+                            {% csrf_token %}
+                            <button type="submit" class="text-graphite-500 hover:text-[#F43F5E] transition-colors p-1 flex items-center justify-center cursor-pointer" title="Excluir Etapa">
+                                <iconify-icon icon="solar:trash-bin-trash-linear" width="16"></iconify-icon>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Column Dropzone -->
+                <div class="flex-1 overflow-y-auto hide-scrollbar space-y-3 min-h-[150px] transition-colors rounded-xl" id="stage-{{ etapa.id }}" ondrop="drop(event)" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)">
+                    {% for lead in leads %}
+                        {% if lead.etapa.id == etapa.id %}
+                        <div class="bg-white border {% if lead.finalizado %}border-[#10B981] bg-[#10B981]/5{% else %}border-graphite-900/10{% endif %} rounded-xl p-4 cursor-grab active:cursor-grabbing shadow-sm hover:shadow-md transition-all" id="lead-card-{{ lead.id }}" draggable="true" ondragstart="drag(event)">
+                            <div class="flex justify-between items-start mb-3">
+                                {% if lead.finalizado %}
+                                <span class="text-[10px] font-semibold px-2 py-1 bg-[#10B981]/10 text-[#10B981] rounded-md tracking-wider uppercase flex items-center gap-1"><iconify-icon icon="solar:check-circle-bold"></iconify-icon> Finalizado</span>
+                                {% else %}
+                                <span class="text-[10px] font-semibold px-2 py-1 bg-[#FEF3C7] text-[#D97706] rounded-md tracking-wider uppercase">Contato</span>
+                                {% endif %}
+                                <div class="flex space-x-2 items-center">
+                                    <button type="button" onclick="toggleFinalizar({{ lead.id }})" class="{% if lead.finalizado %}text-[#10B981]{% else %}text-graphite-300 hover:text-[#10B981]{% endif %} transition-colors p-0.5 flex items-center justify-center cursor-pointer" title="Alternar Finalizado">
+                                        <iconify-icon icon="solar:check-circle-bold" width="16"></iconify-icon>
+                                    </button>
+                                    <form action="/workspace/{{ workspace.id }}/lead/{{ lead.id }}/deletar/" method="POST" class="inline pointer-events-auto" onsubmit="return confirm('Tem certeza que deseja excluir este contato e todo o seu histórico de mensagens?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="text-graphite-300 hover:text-[#F43F5E] transition-colors p-0.5 flex items-center justify-center cursor-pointer" title="Excluir Contato">
+                                            <iconify-icon icon="solar:trash-bin-trash-linear" width="14"></iconify-icon>
+                                        </button>
+                                    </form>
+                                    <div class="w-6 h-6 rounded-full bg-[#10B981] text-white flex items-center justify-center text-xs font-bold shadow-sm ml-1">{{ lead.nome|slice:":2"|upper }}</div>
+                                </div>
+                            </div>
+                            <h4 class="font-display font-semibold {% if lead.finalizado %}text-graphite-500 line-through{% else %}text-graphite-900{% endif %} text-sm">{{ lead.nome }}</h4>
+                            <p class="font-mono text-[10px] text-graphite-500 mt-1">{{ lead.numero }}</p>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            {% empty %}
+            <div class="w-full flex flex-col items-center justify-center py-20 text-graphite-500">
+                <iconify-icon icon="solar:folder-error-linear" width="48" class="mb-4 text-graphite-900/20"></iconify-icon>
+                <p>Nenhuma etapa cadastrada ainda.</p>
+                <p class="text-sm">Clique em "Nova Etapa" para começar.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+
+    <!-- Creation Modal Dialog for Etapa -->
+    <div class="fixed inset-0 bg-graphite-900/60 backdrop-blur-sm z-[100] flex items-center justify-center opacity-0 pointer-events-none transition-all duration-300" id="create-modal">
+        <div class="bg-surface border border-graphite-900/10 max-w-sm w-full p-8 relative scale-95 transition-all duration-300 rounded-2xl shadow-xl" id="modal-container">
+            <!-- Modal Accent Sweep line -->
+            <div class="absolute top-0 left-0 w-full h-[3px] bg-[#10B981] rounded-t-2xl"></div>
+
+            <div class="mb-6 mt-2">
+                <h3 class="font-display font-semibold text-xl text-graphite-900 mb-1">Nova Etapa</h3>
+                <p class="font-body text-xs text-graphite-500">Adicione uma nova etapa ao seu funil.</p>
+            </div>
+
+            <form class="space-y-5" id="etapa-form" method="POST" action="/workspace/{{ workspace.id }}/etapa/nova/">
+                {% csrf_token %}
+                <div class="flex flex-col gap-1.5">
+                    <label class="font-mono text-[10px] text-graphite-500 uppercase tracking-wider font-semibold">Nome da Etapa</label>
+                    <input required name="nome" class="w-full bg-[#F8FAFC] border border-graphite-900/10 px-4 py-3 font-body text-sm text-graphite-900 placeholder:text-graphite-500/50 focus:outline-none focus:border-[#10B981] focus:ring-1 focus:ring-[#10B981] rounded-xl transition-colors" id="etapa-nome" placeholder="Ex: Negociação" type="text"/>
+                </div>
+
+                <!-- Form Controls -->
+                <div class="flex gap-3 pt-4">
+                    <button class="flex-1 py-3 font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-graphite-500 hover:text-graphite-900 bg-surface border border-graphite-900/10 hover:border-graphite-900/20 transition-all rounded-xl" id="btn-close-modal" type="button">
+                        Cancelar
+                    </button>
+                    <button class="flex-1 relative inline-flex items-center justify-center py-3 font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-white bg-[#10B981] hover:bg-[#059669] shadow-[0_4px_14px_rgba(16,185,129,0.2)] rounded-xl transition-all" type="submit">
+                        <span class="relative z-10">Salvar</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Drag & Drop Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const openModalBtn = document.getElementById('btn-open-modal');
+            const closeModalBtn = document.getElementById('btn-close-modal');
+            const modal = document.getElementById('create-modal');
+            const modalContainer = document.getElementById('modal-container');
+
+            function openModal() {
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+                modalContainer.classList.remove('scale-95');
+                modalContainer.classList.add('scale-100');
+            }
+
+            function closeModal() {
+                modal.classList.add('opacity-0', 'pointer-events-none');
+                modalContainer.classList.remove('scale-100');
+                modalContainer.classList.add('scale-95');
+                document.getElementById('etapa-form').reset();
+            }
+
+            openModalBtn.addEventListener('click', openModal);
+            closeModalBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeModal();
+            });
+        });
+
+        // Drag and drop implementation for cards and columns
+        
+        // --- COLUMNS ---
+        let draggedCol = null;
+
+        function dragCol(ev) {
+            draggedCol = ev.target.closest('.column-container');
+            ev.dataTransfer.effectAllowed = "move";
+            ev.dataTransfer.setData("type", "column");
+            setTimeout(() => {
+                if (draggedCol) draggedCol.classList.add('opacity-50', 'scale-95');
+            }, 10);
+        }
+
+        function allowDropCol(ev) {
+            if (draggedCol) {
+                ev.preventDefault();
+            }
+        }
+
+        function dragEnterCol(ev) {
+            if (!draggedCol) return;
+            ev.preventDefault();
+            const targetCol = ev.target.closest('.column-container');
+            if (targetCol && targetCol !== draggedCol && targetCol.id !== 'col-fixed') {
+                targetCol.classList.add('border-amber', 'border-2');
+            }
+        }
+
+        function dragLeaveCol(ev) {
+            if (!draggedCol) return;
+            const targetCol = ev.target.closest('.column-container');
+            if (targetCol && targetCol !== draggedCol) {
+                targetCol.classList.remove('border-amber', 'border-2');
+            }
+        }
+
+        function dropCol(ev) {
+            if (!draggedCol) return;
+            ev.preventDefault();
+            const targetCol = ev.target.closest('.column-container');
+            
+            if (targetCol && targetCol !== draggedCol && targetCol.id !== 'col-fixed') {
+                targetCol.classList.remove('border-amber', 'border-2');
+                const board = document.getElementById('kanban-board');
+                
+                const allCols = Array.from(board.querySelectorAll('.column-container'));
+                const draggedIdx = allCols.indexOf(draggedCol);
+                const targetIdx = allCols.indexOf(targetCol);
+                
+                if (draggedIdx < targetIdx) {
+                    targetCol.after(draggedCol);
+                } else {
+                    targetCol.before(draggedCol);
+                }
+            }
+            
+            if (draggedCol) {
+                draggedCol.classList.remove('opacity-50', 'scale-95');
+            }
+            draggedCol = null;
+        }
+
+        // --- CARDS ---
+        function allowDrop(ev) {
+            if (!draggedCol) ev.preventDefault();
+        }
+
+        function dragEnter(ev) {
+            if (draggedCol) return;
+            ev.preventDefault();
+            const target = ev.target.closest('[id^="stage-"]');
+            if (target) {
+                target.classList.add('dropzone-active');
+            }
+        }
+
+        function dragLeave(ev) {
+            if (draggedCol) return;
+            const target = ev.target.closest('[id^="stage-"]');
+            if (target) {
+                target.classList.remove('dropzone-active');
+            }
+        }
+
+        function drag(ev) {
+            ev.stopPropagation(); // Prevents column from dragging when card is dragged
+            ev.dataTransfer.setData("text", ev.target.id);
+            ev.dataTransfer.effectAllowed = "move";
+            setTimeout(() => {
+                ev.target.classList.add('dragging');
+            }, 10);
+        }
+
+        function drop(ev) {
+            if (draggedCol) return;
+            ev.preventDefault();
+            const data = ev.dataTransfer.getData("text"); // "lead-card-123"
+            const draggedElement = document.getElementById(data);
+            
+            if (!draggedElement) return;
+
+            // Clean up visual cues
+            draggedElement.classList.remove('dragging');
+            document.querySelectorAll('[id^="stage-"]').forEach(el => {
+                el.classList.remove('dropzone-active');
+            });
+            
+            // Find the closest stage column container to append the card
+            const dropTarget = ev.target.closest('[id^="stage-"]');
+            if (dropTarget) {
+                dropTarget.appendChild(draggedElement);
+                updateCounts(); // Update the column counters
+                
+                // Parse IDs
+                const leadId = data.replace('lead-card-', '');
+                const etapaId = dropTarget.id.replace('stage-', '');
+                
+                // Send update to backend
+                fetch(`/workspace/{{ workspace.id }}/lead/atualizar_etapa/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        lead_id: leadId,
+                        etapa_id: etapaId
+                    })
+                }).then(response => response.json())
+                  .then(data => {
+                      if (!data.success) {
+                          console.error('Failed to update stage:', data.error);
+                          alert('Erro ao atualizar etapa do contato.');
+                      }
+                  }).catch(err => console.error('Fetch error:', err));
+            }
+        }
+
+        document.addEventListener('dragend', function(ev) {
+            if (draggedCol) {
+                draggedCol.classList.remove('opacity-50', 'scale-95');
+                draggedCol = null;
+                document.querySelectorAll('.column-container').forEach(el => {
+                    el.classList.remove('border-amber', 'border-2');
+                });
+            } else {
+                ev.target.classList.remove('dragging');
+                document.querySelectorAll('[id^="stage-"]').forEach(el => {
+                    el.classList.remove('dropzone-active');
+                });
+            }
+        });
+
+        // Helper to recalculate column counts visually
+        function updateCounts() {
+            document.querySelectorAll('[id^="stage-"]').forEach(stage => {
+                const count = stage.children.length;
+                const headerSpan = stage.previousElementSibling.querySelector('span');
+                if (headerSpan) {
+                    headerSpan.textContent = count;
+                }
+            });
+        }
+        
+        // Initialize counts on load to include sample cards
+        document.addEventListener('DOMContentLoaded', updateCounts);
+        
+        function toggleFinalizar(leadId) {
+            fetch(`/workspace/{{ workspace.id }}/lead/${leadId}/finalizar/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(response => response.json())
+              .then(data => {
+                  if (data.success) {
+                      // Reload to reflect UI changes on the card
+                      window.location.reload();
+                  } else {
+                      alert('Erro ao finalizar contato.');
+                  }
+              }).catch(err => console.error(err));
+        }
+    </script>
+</body>
+</html>

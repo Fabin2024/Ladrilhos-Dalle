@@ -1,0 +1,22 @@
+[project]
+name = "crm-ladrilho"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "agno>=2.6.9",
+    "chonkie[semantic]>=1.6.8",
+    "chromadb>=1.5.9",
+    "django>=6.0.5",
+    "fastapi[standard]>=0.136.3",
+    "groq>=1.2.0",
+    "openai>=2.41.0",
+    "openpyxl>=3.1.5",
+    "pandas>=3.0.3",
+    "psycopg>=3.3.4",
+    "psycopg2-binary>=2.9.12",
+    "pypdf>=6.13.2",
+    "requests>=2.34.2",
+    "sqlalchemy>=2.0.51",
+]

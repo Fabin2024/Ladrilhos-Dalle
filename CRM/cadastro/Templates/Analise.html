@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html class="scroll-smooth antialiased" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Dalle Piagge Ladrilhos | Análise</title>
+    
+    <!-- Fonts from Google Fonts CDN -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+    
+    <!-- Tailwind CSS from CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Iconify from CDN -->
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        graphite: {
+                            900: '#0E0F11',
+                            800: '#1A1C20',
+                            700: '#2A2D35',
+                            500: '#5C5F66',
+                        },
+                        amber: '#E8A020',
+                        amberDark: '#D18D1A',
+                        canvas: '#F6F4F0',
+                        surface: '#FFFFFF',
+                    },
+                    fontFamily: {
+                        display: ['"Space Grotesk"', 'system-ui', 'sans-serif'],
+                        body: ['"Inter"', 'system-ui', 'sans-serif'],
+                        mono: ['"IBM Plex Mono"', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        .noise-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9998;
+            pointer-events: none;
+            opacity: 0.028;
+            mix-blend-mode: multiply;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.64' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+        
+
+    </style>
+</head>
+
+<body class="bg-canvas text-graphite-900 font-body selection:bg-amber selection:text-white relative min-h-screen flex">
+    <!-- Global Accoutrements -->
+    <div class="noise-overlay"></div>
+
+    <!-- Sidebar Navigation -->
+    <aside class="fixed top-0 left-0 h-screen w-20 bg-graphite-900 border-r border-white/5 flex flex-col items-center py-6 z-50">
+        <!-- Brand Logo -->
+        <div class="w-10 h-10 rounded-full flex items-center justify-center mb-8 shadow-lg overflow-hidden">
+            <img src="/static/img/logo.jpg" alt="Dalle Piagge Ladrilhos Logo" class="w-full h-full object-cover">
+        </div>
+        
+        <!-- Menu Icons -->
+        <div class="flex flex-col gap-6 w-full items-center">
+            <a href="/workspace/{{ workspace.id }}/dashboard/" class="text-graphite-500 hover:text-amber hover:bg-surface/5 rounded-xl p-2.5 transition-colors" title="Dashboard">
+                <iconify-icon icon="solar:home-smile-linear" width="24"></iconify-icon>
+            </a>
+            <a href="/workspace/{{ workspace.id }}/atendimento/" class="text-graphite-500 hover:text-amber hover:bg-surface/5 rounded-xl p-2.5 transition-colors" title="Conversas">
+                <iconify-icon icon="solar:chat-round-dots-linear" width="24"></iconify-icon>
+            </a>
+            <a href="/workspace/{{ workspace.id }}/agente/" class="text-graphite-500 hover:text-amber hover:bg-surface/5 rounded-xl p-2.5 transition-colors" title="IA Agente">
+                <iconify-icon icon="lucide:bot" width="24"></iconify-icon>
+            </a>
+            <a href="/workspace/{{ workspace.id }}/canais/" class="text-graphite-500 hover:text-amber hover:bg-surface/5 rounded-xl p-2.5 transition-colors" title="Canais">
+                <iconify-icon icon="solar:users-group-two-rounded-linear" width="24"></iconify-icon>
+            </a>
+            <a href="/workspace/{{ workspace.id }}/analise/" class="text-amber bg-surface/10 rounded-xl p-2.5 transition-colors" title="Análise">
+                <iconify-icon icon="solar:chart-square-bold" width="24"></iconify-icon>
+            </a>
+        </div>
+        
+        <!-- Bottom Action -->
+        <div class="mt-auto">
+            <a href="{% url 'workspace' %}" class="text-graphite-500 hover:text-amber hover:bg-surface/5 rounded-xl p-2.5 transition-colors block" title="Voltar para Workspaces">
+                <iconify-icon icon="solar:arrow-left-linear" width="24"></iconify-icon>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="ml-20 flex-grow min-h-screen pt-8 px-10 pb-8 flex flex-col">
+        <!-- Header -->
+        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-8">
+            <div class="flex flex-col gap-1">
+                <div class="flex items-center gap-2 text-[#3B82F6]">
+                    <iconify-icon icon="solar:pie-chart-2-linear" width="20"></iconify-icon>
+                    <span class="text-sm font-medium border border-[#3B82F6]/30 bg-[#3B82F6]/10 px-3 py-1 rounded-full">Visão Geral</span>
+                </div>
+                <h1 class="font-display font-semibold text-3xl text-graphite-900 mt-4">Dashboard de Métricas</h1>
+                <p class="font-body text-graphite-500 text-base">Acompanhe o funil de atendimento e a distribuição de status da clínica em tempo real.</p>
+            </div>
+            
+            <div class="flex items-center gap-2">
+                <label for="month-picker" class="text-sm text-graphite-500 font-medium">Visualizar Mês:</label>
+                <input type="month" id="month-picker" value="{{ target_year }}-{% if target_month < 10 %}0{% endif %}{{ target_month }}" class="bg-surface border border-graphite-900/10 rounded-xl px-4 py-2 text-sm text-graphite-900 focus:outline-none focus:border-[#3B82F6]" onchange="changeMonth(this.value)">
+            </div>
+        </header>
+
+        <!-- AI Insights Banner -->
+        <div class="bg-surface border border-[#3B82F6]/20 shadow-sm rounded-2xl p-6 mb-8 relative overflow-hidden">
+            <div class="absolute -right-4 -top-4 text-[#3B82F6]/5">
+                <iconify-icon icon="lucide:bot" width="120"></iconify-icon>
+            </div>
+            <div class="relative z-10">
+                <div class="flex items-center gap-2 mb-3">
+                    <iconify-icon icon="lucide:sparkles" class="text-[#3B82F6]"></iconify-icon>
+                    <h3 class="font-display font-medium text-graphite-900 text-lg">Análise Inteligente do Dashboard</h3>
+                </div>
+                <div id="aiAnalysisContent" class="text-graphite-500 text-sm leading-relaxed">
+                    <div class="flex items-center gap-2 animate-pulse">
+                        <iconify-icon icon="line-md:loading-twotone-loop" width="20"></iconify-icon>
+                        <span>A IA está analisando suas métricas... aguarde um momento.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Metrics Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div class="bg-surface border border-graphite-900/10 shadow-sm rounded-2xl p-5 flex flex-col justify-between">
+                <div class="flex items-center gap-2 mb-2">
+                    <div class="p-2 bg-[#3B82F6]/10 text-[#3B82F6] rounded-lg"><iconify-icon icon="solar:user-plus-bold"></iconify-icon></div>
+                    <span class="text-sm font-medium text-graphite-500">Entraram no Mês</span>
+                </div>
+                <div class="text-3xl font-display font-semibold text-graphite-900">{{ entraram_mes_count }}</div>
+            </div>
+            <div class="bg-surface border border-graphite-900/10 shadow-sm rounded-2xl p-5 flex flex-col justify-between">
+                <div class="flex items-center gap-2 mb-2">
+                    <div class="p-2 bg-[#10B981]/10 text-[#10B981] rounded-lg"><iconify-icon icon="solar:user-check-bold"></iconify-icon></div>
+                    <span class="text-sm font-medium text-graphite-500">Finalizados no Mês</span>
+                </div>
+                <div class="text-3xl font-display font-semibold text-graphite-900">{{ finalizados_mes_count }}</div>
+            </div>
+            <div class="bg-surface border border-graphite-900/10 shadow-sm rounded-2xl p-5 flex flex-col justify-between">
+                <div class="flex items-center gap-2 mb-2">
+                    <div class="p-2 bg-[#F97316]/10 text-[#F97316] rounded-lg"><iconify-icon icon="solar:clock-circle-bold"></iconify-icon></div>
+                    <span class="text-sm font-medium text-graphite-500">Total Pendentes</span>
+                </div>
+                <div class="text-3xl font-display font-semibold text-graphite-900">{{ pendentes_count }}</div>
+            </div>
+            <div class="bg-surface border border-graphite-900/10 shadow-sm rounded-2xl p-5 flex flex-col justify-between">
+                <div class="flex items-center gap-2 mb-2">
+                    <div class="p-2 bg-[#8B5CF6]/10 text-[#8B5CF6] rounded-lg"><iconify-icon icon="solar:flag-bold"></iconify-icon></div>
+                    <span class="text-sm font-medium text-graphite-500">Total Finalizados</span>
+                </div>
+                <div class="text-3xl font-display font-semibold text-graphite-900">{{ finalizados_count }}</div>
+            </div>
+        </div>
+
+        <!-- Charts Area -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- Pie Chart: Distribuição de Status -->
+            <div class="bg-surface border border-graphite-900/10 shadow-sm rounded-2xl p-6 flex flex-col">
+                <h3 class="font-display font-medium text-graphite-900 text-lg mb-6">Distribuição de Status</h3>
+                <div class="flex-1 flex items-center justify-center relative min-h-[300px]">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Bar Chart: Comparativo de Eficiência -->
+            <div class="bg-surface border border-graphite-900/10 shadow-sm rounded-2xl p-6 flex flex-col">
+                <h3 class="font-display font-medium text-graphite-900 text-lg mb-6">Comparativo de Eficiência</h3>
+                <div class="flex-1 flex items-center justify-center relative min-h-[300px]">
+                    <canvas id="efficiencyChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Histórico Chart -->
+        <div class="bg-surface border border-graphite-900/10 shadow-sm rounded-2xl p-6 mb-8 flex flex-col w-full">
+            <h3 class="font-display font-medium text-graphite-900 text-lg mb-6">Histórico de Crescimento (Últimos 6 Meses)</h3>
+            <div class="w-full relative min-h-[350px]">
+                <canvas id="historyChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Sessões/Canais Area -->
+        <div class="bg-surface border border-graphite-900/10 shadow-sm rounded-2xl p-6">
+            <h3 class="font-display font-medium text-graphite-900 text-lg mb-4">Sessões Ativas do Usuário</h3>
+            <p class="text-sm text-graphite-500 mb-6">Lista de canais e instâncias criadas no Kanban.</p>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-graphite-900/5">
+                            <th class="py-3 px-4 font-medium text-graphite-500 text-sm">ID</th>
+                            <th class="py-3 px-4 font-medium text-graphite-500 text-sm">Nome da Sessão (Canal)</th>
+                            <th class="py-3 px-4 font-medium text-graphite-500 text-sm">Número</th>
+                            <th class="py-3 px-4 font-medium text-graphite-500 text-sm">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for canal in canais %}
+                        <tr class="border-b border-graphite-900/5 hover:bg-graphite-900/5 transition-colors">
+                            <td class="py-4 px-4 text-sm text-graphite-500">#{{ canal.id }}</td>
+                            <td class="py-4 px-4 text-sm text-graphite-900 font-medium flex items-center gap-2">
+                                <iconify-icon icon="solar:phone-calling-linear" class="text-amber"></iconify-icon>
+                                {{ canal.nome }}
+                            </td>
+                            <td class="py-4 px-4 text-sm text-graphite-500">{{ canal.numero }}</td>
+                            <td class="py-4 px-4 text-sm">
+                                <span class="bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/20 px-2.5 py-1 rounded-full text-xs">Ativo</span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="py-8 text-center text-graphite-500">Nenhuma sessão encontrada.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Setup Chart.js defaults
+            Chart.defaults.color = '#5C5F66';
+            Chart.defaults.font.family = '"Inter", system-ui, sans-serif';
+
+            // Dados dinâmicos injetados do backend
+            let labels = {{ labels_status|safe }};
+            let dataValues = {{ data_status|safe }};
+            
+            // Se não houver dados reais (todas as etapas zeradas e sem leads)
+            if (labels.length === 0) {
+                labels = ['Sem dados'];
+                dataValues = [1];
+            }
+
+            // Cores estilizadas
+            const pieColors = ['#F43F5E', '#3B82F6', '#EAB308', '#10B981', '#8B5CF6', '#F97316', '#06B6D4'];
+
+            // Pie Chart - Distribuição de Status
+            const ctxStatus = document.getElementById('statusChart').getContext('2d');
+            new Chart(ctxStatus, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: dataValues,
+                        backgroundColor: pieColors.slice(0, labels.length),
+                        borderWidth: 2,
+                        borderColor: '#FFFFFF',
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true,
+                                pointStyle: 'rect'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Bar Chart - Comparativo de Eficiência
+            const ctxEfficiency = document.getElementById('efficiencyChart').getContext('2d');
+            new Chart(ctxEfficiency, {
+                type: 'bar',
+                data: {
+                    labels: ['Entraram (Mês)', 'Finalizados (Mês)', 'Total Pendentes', 'Total Finalizados'],
+                    datasets: [{
+                        label: 'Quantidade',
+                        data: [{{ entraram_mes_count }}, {{ finalizados_mes_count }}, {{ pendentes_count }}, {{ finalizados_count }}],
+                        backgroundColor: ['#3B82F6', '#10B981', '#F97316', '#8B5CF6'],
+                        borderRadius: 4,
+                        barThickness: 50
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(14, 15, 17, 0.05)'
+                            },
+                            border: {
+                                display: false
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            border: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+
+            // Line Chart - Histórico de Crescimento
+            const ctxHistory = document.getElementById('historyChart').getContext('2d');
+            new Chart(ctxHistory, {
+                type: 'line',
+                data: {
+                    labels: {{ historico_labels|safe }},
+                    datasets: [
+                        {
+                            label: 'Entraram',
+                            data: {{ historico_entraram|safe }},
+                            borderColor: '#3B82F6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            fill: true,
+                            pointBackgroundColor: '#FFFFFF',
+                            pointBorderColor: '#3B82F6',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        },
+                        {
+                            label: 'Finalizados',
+                            data: {{ historico_finalizados|safe }},
+                            borderColor: '#10B981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            fill: true,
+                            pointBackgroundColor: '#FFFFFF',
+                            pointBorderColor: '#10B981',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(14, 15, 17, 0.05)'
+                            },
+                            border: {
+                                display: false
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            border: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                pointStyle: 'circle'
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(14, 15, 17, 0.9)',
+                            titleFont: { size: 13 },
+                            bodyFont: { size: 13 },
+                            padding: 12,
+                            cornerRadius: 8,
+                            displayColors: true
+                        }
+                    }
+                }
+            });
+
+            // Fetch AI Analysis
+            fetch(`/workspace/{{ workspace.id }}/analise/ia/`)
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('aiAnalysisContent');
+                    if (data.success && data.analise) {
+                        // Trata quebras de linha básicas para HTML
+                        const textHTML = data.analise.replace(/\n/g, '<br>');
+                        container.innerHTML = `<p>${textHTML}</p>`;
+                    } else {
+                        container.innerHTML = `<p class="text-red-500">Erro ao carregar análise. Tente novamente mais tarde.</p>`;
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('aiAnalysisContent').innerHTML = `<p class="text-red-500">Erro de comunicação ao carregar análise da IA.</p>`;
+                    console.error('Erro na análise da IA:', error);
+                });
+        });
+        
+        function changeMonth(val) {
+            if (!val) return;
+            const parts = val.split('-');
+            if (parts.length === 2) {
+                const year = parts[0];
+                const month = parts[1];
+                window.location.href = `?month=${month}&year=${year}`;
+            }
+        }
+    </script>
+</body>
+</html>

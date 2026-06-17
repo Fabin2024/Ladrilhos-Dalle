@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html class="scroll-smooth antialiased" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Dalle Piagge Ladrilhos | Meus Workspaces</title>
+    
+    <!-- Fonts from Google Fonts CDN -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+    
+    <!-- Tailwind CSS from CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Iconify from CDN -->
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        graphite: {
+                            900: '#0E0F11',
+                            800: '#1A1C20',
+                            700: '#2A2D35',
+                            500: '#5C5F66',
+                        },
+                        amber: '#E8A020',
+                        amberDark: '#D18D1A',
+                        canvas: '#F6F4F0',
+                        surface: '#FFFFFF',
+                    },
+                    fontFamily: {
+                        display: ['"Space Grotesk"', 'system-ui', 'sans-serif'],
+                        body: ['"Inter"', 'system-ui', 'sans-serif'],
+                        mono: ['"IBM Plex Mono"', 'monospace'],
+                    },
+                    fontSize: {
+                        'h1': 'clamp(2.75rem, 5.5vw, 5.25rem)',
+                        'h2': 'clamp(2rem, 3.5vw, 3.25rem)',
+                        'h3': 'clamp(1.2rem, 1.8vw, 1.6rem)',
+                        'body': 'clamp(0.875rem, 1vw, 1rem)',
+                    },
+                    spacing: {
+                        'section': 'clamp(5.5rem, 9vw, 11rem)',
+                        'container': 'clamp(1.5rem, 5vw, 4rem)',
+                        'card': 'clamp(1.75rem, 2.5vw, 2.5rem)',
+                    },
+                    transitionTimingFunction: {
+                        'swiss': 'cubic-bezier(0.16, 1, 0.3, 1)',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Custom Style Sheet (Reusing exact styles from Design System) -->
+    <style>
+        /* Noise Overlay */
+        .noise-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9998;
+            pointer-events: none;
+            opacity: 0.028;
+            mix-blend-mode: multiply;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.64' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+        /* Utilities */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .text-balance { text-wrap: balance; }
+        /* JS Triggers */
+        .reveal-up {
+            opacity: 0;
+            transform: translateY(18px);
+            transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal-up.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .scan-line {
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .scan-line.is-visible {
+            transform: scaleX(1);
+        }
+        /* Flashlight Effect */
+        :root {
+            --mouse-x: 50%;
+            --mouse-y: 50%;
+        }
+        .flashlight-card {
+            position: relative;
+            background-color: #FFFFFF;
+            border: 1px solid rgba(14, 15, 17, 0.08);
+            overflow: hidden;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .flashlight-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(14, 15, 17, 0.05);
+        }
+        .flashlight-card::before {
+            content: "";
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            left: 0;
+            top: 0;
+            border-radius: inherit;
+            background: radial-gradient(
+                800px circle at var(--mouse-x) var(--mouse-y),
+                rgba(232, 160, 32, 0.06),
+                transparent 40%
+            );
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+            z-index: 3;
+        }
+        .flashlight-card::after {
+            content: "";
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            left: 0;
+            top: 0;
+            border-radius: inherit;
+            background: radial-gradient(
+                600px circle at var(--mouse-x) var(--mouse-y),
+                rgba(255, 255, 255, 0.8),
+                transparent 40%
+            );
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+        }
+        .flashlight-border {
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            padding: 1px;
+            background: radial-gradient(
+                600px circle at var(--mouse-x) var(--mouse-y),
+                rgba(232, 160, 32, 0.5),
+                transparent 40%
+            );
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        .flashlight-card:hover::before,
+        .flashlight-card:hover .flashlight-border {
+            opacity: 1;
+        }
+        html,body { opacity: 1!important; visibility: visible!important; }
+    </style>
+</head>
+
+<body class="bg-canvas text-graphite-900 font-body text-body selection:bg-amber selection:text-white relative overflow-x-hidden min-h-screen flex flex-col justify-between">
+
+    <!-- Global Accoutrements -->
+    <div class="noise-overlay"></div>
+    
+    <!-- Navigation Header -->
+    <nav id="navbar" class="fixed top-0 w-full z-40 transition-all duration-300 bg-surface/90 border-b border-graphite-900/10 backdrop-blur-md px-container py-4 flex items-center justify-between">
+        <a href="#" class="font-display font-semibold text-xl tracking-[0.04em] text-graphite-900 uppercase flex items-center gap-2">
+            <img src="/static/img/logo.jpg" alt="Dalle Piagge Ladrilhos Logo" class="w-10 h-10 rounded-full object-cover border border-graphite-900/10">
+            Dalle Piagge Ladrilhos
+        </a>
+        
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2 border-l border-graphite-900/10 pl-4">
+                <div class="w-8 h-8 bg-graphite-900 text-canvas flex items-center justify-center font-mono text-xs rounded-md">US</div>
+                <span class="font-mono text-xs text-graphite-500 hidden sm:block">Acelerador User</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow pt-[100px] pb-24 px-container">
+        <!-- Scan line Sweep -->
+        <div class="absolute top-[100px] left-0 w-[1px] h-[3px] bg-amber opacity-0 z-10 animate-sweep pointer-events-none"></div>
+
+        <div class="max-w-[clamp(70rem,92vw,96rem)] mx-auto mt-8">
+            <!-- Header section -->
+            <div class="reveal-up is-visible mb-12">
+                <h1 class="font-display font-light text-h2 leading-[1.1] tracking-tight text-graphite-900 mb-2">Meus Workspaces</h1>
+                <p class="font-body text-graphite-500 text-sm md:text-base">Gerencie seus projetos e espaços de trabalho por nicho ou setor.</p>
+            </div>
+
+            <!-- Grid container -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="flashlight-grid">
+                <!-- "Criar Workspace" Card (Always First) -->
+                <div class="flashlight-card rounded-xl p-8 h-64 flex flex-col justify-end group cursor-pointer animate-on-scroll reveal-up is-visible" id="btn-open-modal">
+                    <div class="flashlight-border"></div>
+                    <div class="relative z-10">
+                        <div class="w-10 h-10 bg-amber/10 rounded-lg flex items-center justify-center mb-4 text-amberDark group-hover:scale-110 transition-transform duration-300">
+                            <iconify-icon icon="solar:add-circle-linear" width="24"></iconify-icon>
+                        </div>
+                        <h3 class="text-lg font-medium text-graphite-900 mb-2">Criar Workspace</h3>
+                        <p class="text-sm text-graphite-500 leading-relaxed">Adicione um novo espaço de trabalho para seu nicho.</p>
+                    </div>
+                </div>
+
+                <!-- Django Database Workspaces -->
+                {% for ws in workspace_check %}
+                <div class="flashlight-card rounded-xl p-8 h-64 flex flex-col justify-between group cursor-default animate-on-scroll reveal-up is-visible">
+                    <div class="flashlight-border"></div>
+                    <a href="/workspace/{{ ws.id }}/dashboard/" class="absolute inset-0 z-0"></a>
+                    
+                    <div class="relative z-10 flex justify-between items-start">
+                        <div class="w-10 h-10 bg-graphite-900/5 rounded-lg flex items-center justify-center text-graphite-900 font-display font-semibold group-hover:scale-110 group-hover:text-amberDark group-hover:bg-amber/10 transition-all duration-300">
+                            {{ ws.Workpaces_name|slice:":1"|upper }}
+                        </div>
+                        <form action="/workspace/delete/{{ ws.id }}/" method="POST" class="inline pointer-events-auto" onsubmit="return confirm('Tem certeza que deseja excluir esta área de trabalho? Todos os dados serão perdidos.');">
+                            {% csrf_token %}
+                            <button type="submit" class="text-graphite-400 hover:text-[#F43F5E] transition-all duration-300 p-1 flex items-center justify-center cursor-pointer relative z-20" title="Excluir Workspace">
+                                <iconify-icon icon="solar:trash-bin-trash-linear" width="16"></iconify-icon>
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="relative z-10 pointer-events-none mt-auto">
+                        <div class="flex items-center gap-2 mb-2">
+                            <h3 class="text-lg font-medium text-graphite-900 group-hover:text-amberDark transition-colors">{{ ws.Workpaces_name }}</h3>
+                            <span class="inline-flex font-mono text-[9px] text-graphite-500 font-bold uppercase tracking-wider bg-canvas px-2 py-0.5 rounded border border-graphite-900/5">{{ ws.nicho }}</span>
+                        </div>
+                        <p class="text-sm text-graphite-500 leading-relaxed line-clamp-2">
+                            {{ ws.description }}
+                        </p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </main>
+
+    <!-- Creation Modal Dialog -->
+    <div class="fixed inset-0 bg-graphite-900/60 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-all duration-300" id="create-modal">
+        <div class="bg-surface border border-graphite-900/10 max-w-md w-full p-8 relative scale-95 transition-all duration-300" id="modal-container">
+            <!-- Modal Accent Sweep line -->
+            <div class="absolute top-0 left-0 w-full h-[2px] bg-amber"></div>
+
+            <div class="mb-6">
+                <h3 class="font-display font-light text-2xl text-graphite-900 mb-1">Novo Workspace</h3>
+                <p class="font-body text-xs text-graphite-500">Configure uma nova área de trabalho segmentada.</p>
+            </div>
+
+            <!-- Standard HTML form posting to Django workspace view -->
+            <form class="space-y-4" id="workspace-form" method="POST" action="/workspace/">
+                {% csrf_token %}
+                <!-- Name input -->
+                <div class="flex flex-col gap-1.5">
+                    <label class="font-mono text-[10px] text-graphite-500 uppercase tracking-wider">Nome do Workspace</label>
+                    <input required name="Workpaces_name" class="w-full bg-canvas border border-graphite-900/20 px-4 py-3 font-mono text-xs text-graphite-900 placeholder:text-graphite-500/50 focus:outline-none focus:border-amber focus:ring-1 focus:ring-amber rounded-none transition-colors" id="ws-name" placeholder="EX: LOJA Y, IMOBILIÁRIA X" type="text"/>
+                </div>
+
+                <!-- Niche input (nicho - Text Field in database model) -->
+                <div class="flex flex-col gap-1.5">
+                    <label class="font-mono text-[10px] text-graphite-500 uppercase tracking-wider">Segmento / Nicho</label>
+                    <input required name="nicho" class="w-full bg-canvas border border-graphite-900/20 px-4 py-3 font-mono text-xs text-graphite-900 placeholder:text-graphite-500/50 focus:outline-none focus:border-amber focus:ring-1 focus:ring-amber rounded-none transition-colors" id="ws-niche" placeholder="EX: VAREJO, IMOBILIÁRIO, SaaS" type="text"/>
+                </div>
+
+                <!-- Description (description) -->
+                <div class="flex flex-col gap-1.5">
+                    <label class="font-mono text-[10px] text-graphite-500 uppercase tracking-wider">Descrição curta</label>
+                    <textarea required name="description" class="w-full bg-canvas border border-graphite-900/20 px-4 py-3 font-mono text-xs text-graphite-900 placeholder:text-graphite-500/50 focus:outline-none focus:border-amber focus:ring-1 focus:ring-amber rounded-none transition-colors h-24 resize-none" id="ws-desc" placeholder="DESCREVA A FINALIDADE DESTE ESPAÇO..."></textarea>
+                </div>
+
+                <!-- Form Controls -->
+                <div class="flex gap-4 pt-4">
+                    <button class="w-1/2 py-3 font-mono text-xs font-semibold uppercase tracking-[0.1em] text-graphite-900 bg-surface border border-graphite-900/10 hover:border-graphite-900/20 transition-all rounded-none" id="btn-close-modal" type="button">
+                        Cancelar
+                    </button>
+                    <button class="w-1/2 relative inline-flex items-center justify-center py-3 font-mono text-xs font-semibold uppercase tracking-[0.1em] text-surface bg-gradient-to-b from-graphite-800 to-graphite-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] rounded-none group hover:brightness-110 overflow-hidden" type="submit">
+                        <span class="relative z-10">Criar Espaço</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-graphite-900 text-surface pt-12 pb-6 px-container border-t border-surface/10 relative z-30">
+        <div class="max-w-[clamp(70rem,92vw,96rem)] mx-auto flex flex-col sm:flex-row justify-between items-center gap-4 text-center sm:text-left">
+            <span class="font-mono text-[10px] text-surface/50 uppercase tracking-widest">
+                Dalle Piagge Ladrilhos © 2026. MEUS WORKSPACES MANAGEMENT.
+            </span>
+            <span class="font-mono text-[10px] text-amber uppercase tracking-widest">
+                Active & Connected
+            </span>
+        </div>
+    </footer>
+
+    <!-- Interactive Toggles & Theme Styling Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const openModalBtn = document.getElementById('btn-open-modal');
+            const closeModalBtn = document.getElementById('btn-close-modal');
+            const modal = document.getElementById('create-modal');
+            const modalContainer = document.getElementById('modal-container');
+
+            // Modal Trigger Actions
+            function openModal() {
+                modal.classList.add('opacity-100', 'pointer-events-auto');
+                modalContainer.classList.add('scale-100');
+            }
+
+            function closeModal() {
+                modal.classList.remove('opacity-100', 'pointer-events-auto');
+                modalContainer.classList.remove('scale-100');
+                document.getElementById('workspace-form').reset();
+            }
+
+            openModalBtn.addEventListener('click', openModal);
+            closeModalBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeModal();
+            });
+            
+            // Intersection observer for reveals
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.querySelectorAll('.reveal-up').forEach(el => el.classList.add('is-visible'));
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            document.querySelectorAll('main').forEach(m => observer.observe(m));
+            
+            // Flashlight Effect
+            const gridContainer = document.getElementById('flashlight-grid');
+            if (gridContainer) {
+                gridContainer.addEventListener('mousemove', (e) => {
+                    const cards = document.querySelectorAll('.flashlight-card');
+                    
+                    cards.forEach(card => {
+                        const rect = card.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const y = e.clientY - rect.top;
+                        
+                        card.style.setProperty('--mouse-x', `${x}px`);
+                        card.style.setProperty('--mouse-y', `${y}px`);
+                    });
+                });
+            }
+        });
+    </script>
+</body>
+</html>

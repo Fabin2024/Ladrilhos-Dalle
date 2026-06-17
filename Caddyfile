@@ -1,0 +1,3 @@
+crmdalle.com.br {
+    reverse_proxy crm-ladrilho:8000
+}

@@ -60,6 +60,8 @@ async def enviar_mensagem_whatsapp(instancia: str, numero: str, texto: str):
 
 @sync_to_async
 def get_or_create_lead(remote_jid, instancia, push_name=None):
+    from django.db import close_old_connections
+    close_old_connections()
     workspace_id = None
     if instancia and instancia.startswith("ws_"):
         parts = instancia.split("_")
@@ -104,10 +106,14 @@ def get_or_create_lead(remote_jid, instancia, push_name=None):
 
 @sync_to_async
 def save_message(lead, text, from_me):
+    from django.db import close_old_connections
+    close_old_connections()
     return Mensagem.objects.create(lead=lead, texto=text, from_me=from_me)
 
 @sync_to_async
 def get_workspace_for_instancia(instancia):
+    from django.db import close_old_connections
+    close_old_connections()
     if instancia and instancia.startswith("ws_"):
         parts = instancia.split("_")
         if len(parts) >= 2 and parts[1].isdigit():

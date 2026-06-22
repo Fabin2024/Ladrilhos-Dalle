@@ -122,6 +122,8 @@ async def processar_mensagem_agente(payload: dict):
     2. Envia para o agente (Agno) via .arun() de forma assíncrona
     3. Devolve a resposta para o WhatsApp
     """
+    from django.db import close_old_connections
+    close_old_connections()
     try:
         # Identifica o evento
         event = payload.get("event")

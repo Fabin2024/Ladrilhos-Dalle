@@ -99,7 +99,7 @@ def criar_agente(nome, instrucoes, workspace_id=None, instancia=None, remote_jid
                 ]
             }
             try:
-                resp = requests.post(url, json=payload, headers=headers)
+                resp = requests.post(url, json=payload, headers=headers, timeout=15)
                 resp.raise_for_status()
                 return f"Cartão de contato de {nome_contato} enviado com sucesso para o WhatsApp do usuário! Diga a ele que acabou de enviar o contato."
             except Exception as e:

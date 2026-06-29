@@ -52,7 +52,7 @@ async def enviar_mensagem_whatsapp(instancia: str, numero: str, texto: str):
     }
     try:
         # Usa asyncio.to_thread para não bloquear o event loop com o requests síncrono
-        response = await asyncio.to_thread(requests.post, url, json=payload, headers=headers)
+        response = await asyncio.to_thread(requests.post, url, json=payload, headers=headers, timeout=15)
         response.raise_for_status()
         logger.info(f"Mensagem do agente enviada com sucesso para {numero} (Instância: {instancia})")
     except Exception as e:
@@ -135,6 +135,7 @@ async def processar_mensagem_agente(payload: dict):
         event = payload.get("event")
         if event != "messages.upsert":
             return # Só queremos processar novas mensagens
+        logger.info(f"[DEBUG WEBHOOK] messages.upsert recebido de: {payload.get('data', {}).get('key', {}).get('remoteJid')}")
             
         data = payload.get("data", {})
         message_info = data.get("message", {})
@@ -148,8 +149,8 @@ async def processar_mensagem_agente(payload: dict):
         # Na v2.3.7, o número real vem em remoteJidAlt quando o JID principal é oculto
         remote_jid = key.get("remoteJidAlt") or key.get("remoteJid", "")
         
-        # Ignora mensagens de grupos (@g.us) ou se por acaso ainda vier como @lid absoluto
-        if not remote_jid or "@g.us" in remote_jid or "@lid" in remote_jid:
+        # Ignora mensagens de grupos (@g.us)
+        if not remote_jid or "@g.us" in remote_jid:
             return
             
         # Verifica se é uma mensagem de áudio
@@ -157,9 +158,17 @@ async def processar_mensagem_agente(payload: dict):
         arquivo_audio = None
         instancia = payload.get("instance")
 
-        # Extrai o texto da mensagem (Evolution API possui múltiplos formatos dependendo do tipo da msg)
-        texto_mensagem = message_info.get("conversation") or \
-                         message_info.get("extendedTextMessage", {}).get("text")
+        # Extrai o texto da mensagem buscando inclusive dentro de ephemeralMessage (mensagens temporárias)
+        def buscar_texto_recursivo(obj):
+            if not isinstance(obj, dict): return None
+            if obj.get("conversation"): return obj.get("conversation")
+            if obj.get("extendedTextMessage", {}).get("text"): return obj.get("extendedTextMessage").get("text")
+            for v in obj.values():
+                if isinstance(v, dict):
+                    res = buscar_texto_recursivo(v)
+                    if res: return res
+            return None
+        texto_mensagem = buscar_texto_recursivo(message_info)
         
         if message_type == "audioMessage" or "audioMessage" in message_info:
             # Baixa o áudio via Evolution API
@@ -172,7 +181,7 @@ async def processar_mensagem_agente(payload: dict):
                 # O Evolution API pede o objeto "message" completo (com key) para baixar a mídia
                 payload_media = {"message": data}
                 # Para chamadas assíncronas
-                resp_media = await asyncio.to_thread(requests.post, url_base64, json=payload_media, headers=headers_api)
+                resp_media = await asyncio.to_thread(requests.post, url_base64, json=payload_media, headers=headers_api, timeout=30)
                 resp_media.raise_for_status()
                 
                 base64_data = resp_media.json().get("base64")
@@ -191,6 +200,7 @@ async def processar_mensagem_agente(payload: dict):
                 return
 
         if not texto_mensagem:
+            logger.info(f"[DEBUG WEBHOOK] Mensagem ignorada pois não possui texto nem áudio. JID: {remote_jid}")
             return # Ignora se não houver texto (ex: imagem sem legenda) e não for áudio
         
         logger.info(f"Mensagem de {remote_jid}: {texto_mensagem}")
@@ -219,30 +229,31 @@ async def processar_mensagem_agente(payload: dict):
         # Utilizamos o arun() conforme documentação do Agno 
         # para que a chamada não trave as outras threads
         # ==========================================================
-        resposta_agente = await agente.arun(texto_mensagem)
-        
-        # Exclui o arquivo temporário de áudio se foi criado
-        if arquivo_audio and os.path.exists(arquivo_audio):
-            try:
-                os.remove(arquivo_audio)
-            except Exception as e:
-                logger.error(f"Erro ao excluir áudio temporário: {e}")
-        
-        # O retorno normalmente possui a propriedade 'content'
-        texto_resposta = resposta_agente.content if hasattr(resposta_agente, 'content') else str(resposta_agente)
-        
-        logger.info(f"Resposta gerada: {texto_resposta}")
-        
-        # === Salva Resposta de Saída no Django ===
-        if lead:
-            try:
-                await save_message(lead, texto_resposta, from_me=True)
-            except Exception as e:
-                logger.error(f"Erro ao salvar resposta no DB: {e}")
-        # ==================================================
-        
-        # Envia a resposta de volta ao WhatsApp
-        await enviar_mensagem_whatsapp(instancia, remote_jid, texto_resposta)
+        try:
+            resposta_agente = await agente.arun(texto_mensagem)
+            
+            # O retorno normalmente possui a propriedade 'content'
+            texto_resposta = resposta_agente.content if hasattr(resposta_agente, 'content') else str(resposta_agente)
+            
+            logger.info(f"Resposta gerada: {texto_resposta}")
+            
+            # === Salva Resposta de Saída no Django ===
+            if lead:
+                try:
+                    await save_message(lead, texto_resposta, from_me=True)
+                except Exception as e:
+                    logger.error(f"Erro ao salvar resposta no DB: {e}")
+            # ==================================================
+            
+            # Envia a resposta de volta ao WhatsApp
+            await enviar_mensagem_whatsapp(instancia, remote_jid, texto_resposta)
+        finally:
+            # Exclui o arquivo temporário de áudio se foi criado
+            if arquivo_audio and os.path.exists(arquivo_audio):
+                try:
+                    os.remove(arquivo_audio)
+                except Exception as e:
+                    logger.error(f"Erro ao excluir áudio temporário: {e}")
         
     except Exception as e:
         logger.error(f"Erro no processamento background do Agente: {e}")
